@@ -72,12 +72,39 @@ class RecordingFile(object):
         self.wavefile.close()
 
     def _prepare_file(self, fname, mode='wb'):
-        wavefile = wave.open(fname, mode)
-        wavefile.setnchannels(self.channels)
-        wavefile.setsampwidth(self._pa.get_sample_size(pyaudio.paInt16))
-        wavefile.setframerate(self.rate)
+        if mode == 'wb':
+            wavefile = wave.open(fname, mode)
+            wavefile.setnchannels(self.channels)
+            wavefile.setsampwidth(self._pa.get_sample_size(pyaudio.paInt16))
+            wavefile.setframerate(self.rate)
+        elif mode == 'rb':
+            wavefile = wave.open(fname, mode)
+        else:
+            print("prepare file error!")
         return wavefile
 
-test = Recorder()
-rec = test.open("test.wav")
-rec.record(5)
+    def playback_file(self):
+        self._stream = self._pa.open(format=self._pa.get_format_from_width(self.wavefile.getsampwidth()),
+                                        channels=self.channels,
+                                        rate=self.rate,
+                                        output=True,
+                                        frames_per_buffer=self.frames_per_buffer,
+                                        stream_callback=self.get_playback_callback())
+        self._stream.start_stream()
+        return self
+    
+    def get_playback_callback(self):
+        def callback(in_data, frame_count, time_info, status):
+            data = self.wavefile.readframes(frame_count)
+            return (data, pyaudio.paContinue)
+        return callback
+
+# test = Recorder()
+# # rec = test.open("temp/test.wav", mode="wb")
+# rec = test.open("temp/test.wav", mode="rb")
+# # rec.record(5)
+# rec.playback_file()
+# while True:
+#     print("audio playin?")
+
+

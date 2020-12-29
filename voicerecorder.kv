@@ -1,0 +1,122 @@
+#:set xButtonMargin 0.05
+#:set yButtonMargin 0.02
+#:set buttonHeight 0.1
+<Button>
+    # font_size: app.font_size
+    font_size: 32
+    size_hint: (0.3, buttonHeight)   
+<StartLayout>
+    FloatLayout:
+        size: root.width, root.height
+
+        Button:
+            pos_hint: {'x': xButtonMargin, 'y': 3*yButtonMargin +2*buttonHeight }
+            text: "test"
+            on_press: 
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'testing_screen'
+        Button:
+            pos_hint: {'x': xButtonMargin, 'y': 2*yButtonMargin + buttonHeight }
+            text: "nastavitve"
+            on_press: 
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'settings_screen'
+        Button:
+            pos_hint: {'x': xButtonMargin, 'y': yButtonMargin }
+            text: "o programu"
+            on_press: 
+                root.manager.transition.direction = 'up'
+                root.manager.current = 'about_screen'
+        Button:
+            size_hint: (0.5, 0.3)
+            pos_hint: {'x': 1 - xButtonMargin - 0.5, 'y': yButtonMargin }
+            text: "Začetek"
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'record_screen'
+        Label:
+            text:"VOICE RECORDER :>"
+            # size_hint: (0.9, 0.5)
+            # pos_hint: {'x': 0.1, 'y': 0.9 }
+            background_color: (1,1,1,1)
+
+<RecordScreen>
+    GridLayout:
+        cols: 1
+        Label:
+            text: "RECORDING BABY!"
+        Button:
+            text: "return"
+            on_press: 
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'start_screen'
+<SettingScreen>
+    GridLayout:
+        cols: 1
+        Label:
+            text: "SETTINGS BABY!"
+        Button:
+            text: "return"
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'start_screen'
+<TestingScreen>
+    FloatLayout:
+        size: root.width, root.height
+
+        Label:
+            text: "TESTING BABY!"
+        Button:
+            text: "Test"
+            pos_hint: {'center_x': 0.5, 'center_y': 0.4 }
+            on_press: root.test_audio()
+        Button:
+            text: "return"
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'start_screen'
+<AboutScreen>
+    GridLayout:
+        cols: 1
+        Label:
+            text: "ABOUT THINGS BABY!"
+        Button:
+            text: "return"
+            on_press: 
+                root.manager.transition.direction = 'down'
+                root.manager.current = 'start_screen'
+
+# <MyLayout>
+#     GridLayout:
+        
+#         size: root.width, root.height
+#         cols: 1
+#         Label:
+#             text: "Hello!"
+#             size_hint: (1, 1.8)
+        
+#         GridLayout:
+#             cols: 2
+#             padding: (10, 10, 10, 10)
+#             spacing: (10, 10)
+#             GridLayout:
+#                 cols: 1
+#                 padding: (40, 0, 40, 0)
+#                 spacing: (10, 10)
+#                 Button:
+#                     size_hint: (0.2, 0.2)
+#                     font_size: 32
+#                     text: "test"
+#                 Button:
+#                     size_hint: (0.2, 0.2)
+#                     font_size: 32
+#                     text: "nastavitve"
+#                 Button:
+#                     size_hint: (0.2, 0.2)
+#                     font_size: 32
+#                     text: "o programu"
+
+#             Button:
+#                 size_hint: (1, 1)
+#                 font_size: 32
+#                 text: "Začetek"
