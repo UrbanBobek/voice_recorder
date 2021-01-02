@@ -1,52 +1,236 @@
 #:set xButtonMargin 0.05
 #:set yButtonMargin 0.02
 #:set buttonHeight 0.1
-<Button>
+#:set xTextInputMargin 0.3
+#:set yTextInputMargin 0.01
+#:set textInputFontSize 32
+#:set textInputWidth 0.3
+#:set textInputHeight 0.08
+<MyButton@Button>
     # font_size: app.font_size
     font_size: 32
     size_hint: (0.3, buttonHeight)   
+<ReturnButton@Button>
+    text: "return"
+    font_size: 20
+    size_hint: (0.1, 0.1)
+
+
 <StartLayout>
     FloatLayout:
         size: root.width, root.height
 
-        Button:
+        MyButton:
             pos_hint: {'x': xButtonMargin, 'y': 3*yButtonMargin +2*buttonHeight }
             text: "test"
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'testing_screen'
-        Button:
+        MyButton:
             pos_hint: {'x': xButtonMargin, 'y': 2*yButtonMargin + buttonHeight }
             text: "nastavitve"
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'settings_screen'
-        Button:
+        MyButton:
             pos_hint: {'x': xButtonMargin, 'y': yButtonMargin }
             text: "o programu"
             on_press: 
                 root.manager.transition.direction = 'up'
                 root.manager.current = 'about_screen'
-        Button:
+        MyButton:
             size_hint: (0.5, 0.3)
             pos_hint: {'x': 1 - xButtonMargin - 0.5, 'y': yButtonMargin }
             text: "Začetek"
             on_press: 
                 root.manager.transition.direction = 'left'
-                root.manager.current = 'record_screen'
+                root.manager.current = 'user_data_screen'
         Label:
             text:"VOICE RECORDER :>"
             # size_hint: (0.9, 0.5)
             # pos_hint: {'x': 0.1, 'y': 0.9 }
             background_color: (1,1,1,1)
 
+<UserDataScreen>
+    FloatLayout:
+        size: root.width, root.height
+        Label:
+            text: "USER DATA BABY!"
+
+            color: (0,0,0,1)
+            bold: True
+            pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+        
+        Label:
+            text: "Ime"
+
+            font_size: 32
+            color: (0,0,0,1)
+            bold: True
+            pos_hint: {'center_x': xTextInputMargin -0.1, 'center_y': 0.7+textInputHeight/2}
+        TextInput:
+            id:name_input
+            text: ""
+            multiline: False
+            write_tab: False
+            font_size: textInputFontSize
+            size_hint: (textInputWidth, textInputHeight)
+            pos_hint: {'x': xTextInputMargin, 'y': 0.7}
+
+        Label:
+            text: "Priimek"
+
+            font_size: 32
+            color: (0,0,0,1)
+            bold: True
+            pos_hint: {'center_x': xTextInputMargin -0.1, 'center_y': (0.7 - textInputHeight - yTextInputMargin) + textInputHeight/2}
+        TextInput:
+            id:surname_input
+            text: ""
+            multiline: False
+            write_tab: False
+            font_size: textInputFontSize
+            size_hint: (textInputWidth, textInputHeight)
+            pos_hint: {'x': xTextInputMargin, 'y': 0.7 - textInputHeight - yTextInputMargin}
+
+        Label:
+            text: "Koda"
+
+            font_size: 32
+            color: (0,0,0,1)
+            bold: True
+            pos_hint: {'center_x': xTextInputMargin -0.1, 'center_y': (0.7 - 2*textInputHeight - 2*yTextInputMargin) + textInputHeight/2}
+        TextInput:
+            id:code_input
+            text: ""
+            multiline: False
+            write_tab: False
+            font_size: textInputFontSize
+            size_hint: (textInputWidth, textInputHeight)
+            pos_hint: {'x': xTextInputMargin, 'y': 0.7 - 2*textInputHeight - 2*yTextInputMargin}
+
+        Label:
+            text: "Regija"
+
+            font_size: 32
+            color: (0,0,0,1)
+            bold: True
+            pos_hint: {'center_x': xTextInputMargin -0.1, 'center_y': (0.7- 3*textInputHeight - 3*yTextInputMargin) + textInputHeight/2}
+        Spinner:
+            id:spinner_id
+            text: "Izberi regijo"
+            
+            values: ["Primorska", "Osrednjeslovenska", "Gorenjska", "Štajerska", "Dolenjska", "Koroška?", "Trst", "Posavska", "Hrvaška"]
+            font_size: textInputFontSize
+            size_hint: (textInputWidth, textInputHeight)
+            pos_hint: {'x': xTextInputMargin, 'y': 0.7- 3*textInputHeight - 3*yTextInputMargin}
+            on_text: root.spinner_clicked(spinner_id.text)
+        
+        Label:
+            text: "Spol"
+            bold: True
+            font_size: 32
+            color: (0,0,0,1)
+            pos_hint: {'center_x': 0.75, 'center_y': 0.75}
+        Label:
+            text: "Moški"
+            font_size: 20
+            color: (0,0,0,1)
+            pos_hint: {'center_x': 0.7, 'center_y': 0.7}
+        CheckBox:
+            group: "spol"
+            value: root.male
+            color:(0,0,0,1)
+            size_hint:(0.03, 0.03)
+            pos_hint: {'center_x': 0.7, 'center_y': 0.65}
+            on_active: root.sex_clicked(self, self.active)
+        Label:
+            text: "Ženski"
+            font_size: 20
+            color: (0,0,0,1)
+            pos_hint: {'center_x': 0.8, 'center_y': 0.7}
+        CheckBox:
+            group: "spol"
+            value: root.female
+            color:(0,0,0,1)
+            size_hint:(0.03, 0.03)
+            pos_hint: {'center_x': 0.8, 'center_y': 0.65}
+            # on_active: root.sex_clicked(self, self.active)
+
+        MyButton:   
+            text: "Začni"
+
+            pos_hint: {'x': 1 - 0.3 - xButtonMargin, 'y': yButtonMargin}
+            size_hint: (0.3, buttonHeight) 
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'record_screen'
+                root.save_user_data(name_input.text, surname_input.text, code_input.text, spinner_id.text)
+        ReturnButton:
+            pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
+            on_press: 
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'start_screen'
 <RecordScreen>
-    GridLayout:
+    FloatLayout:
         cols: 1
         Label:
-            text: "RECORDING BABY!"
-        Button:
-            text: "return"
+            id: screen_text
+            text: root.text_to_read
+            text_size: self.width, None
+            # size_hint: 1, None
+            font_size: 40
+            height: self.texture_size[1]
+            size_hint: (0.8, 0.5)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.65}
+
+            # background_color: (0,0,0,1)
+            # canvas.before:
+            #     Color:
+            #         rgba: self.background_color
+            #     Rectangle:
+            #         size: self.size
+            #         pos: self.size
+            color: (0,0,0,1)
+            
+        MyButton:
+            text: "Naslednji"
+
+            font_size: 32
+            bold: True
+            pos_hint: {'center_x': 0.5, 'center_y': 0.25}
+            size_hint: (0.35, buttonHeight) 
+            on_press: 
+                root.next_recording()
+                screen_text.text = root.text_to_read
+        MyButton:
+            text: "Ponovi"
+
+            font_size: 32
+            bold: True
+            pos_hint: {'center_x': 0.5, 'center_y': 0.25 - buttonHeight - 0.015 }
+            size_hint: (0.28, buttonHeight) 
+            on_press: # Ponovno začni snemati
+
+        MyButton:
+            text: "Playback"
+
+            font_size: 28
+            bold: True
+            pos_hint: {'center_x': 0.8, 'center_y': 0.25}
+            size_hint: (0.1, buttonHeight) 
+            # on_press: playback
+        MyButton:
+            text: "1 nazaj"
+
+            font_size: 28
+            bold: True
+            pos_hint: {'center_x': 0.2, 'center_y': 0.25}
+            size_hint: (0.1, buttonHeight) 
+            # on_press: playback
+
+        ReturnButton:
+            pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'start_screen'
@@ -55,7 +239,7 @@
         cols: 1
         Label:
             text: "SETTINGS BABY!"
-        Button:
+        MyButton:
             text: "return"
             on_press: 
                 root.manager.transition.direction = 'left'
@@ -66,11 +250,11 @@
 
         Label:
             text: "TESTING BABY!"
-        Button:
+        MyButton:
             text: "Test"
             pos_hint: {'center_x': 0.5, 'center_y': 0.4 }
             on_press: root.test_audio()
-        Button:
+        MyButton:
             text: "return"
             on_press: 
                 root.manager.transition.direction = 'left'
@@ -80,7 +264,7 @@
         cols: 1
         Label:
             text: "ABOUT THINGS BABY!"
-        Button:
+        MyButton:
             text: "return"
             on_press: 
                 root.manager.transition.direction = 'down'

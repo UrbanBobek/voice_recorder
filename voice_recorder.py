@@ -34,8 +34,81 @@ class StartLayout(Screen):
     # rec = Recorder()
 
 class RecordScreen(Screen):
-    pass
+    # Create Recorder object
+    recorder = Recorder()
+    rec = None
+
+    # Read user code from file
+    fp = open("user_data/user_data.txt")
+    t = fp.read()
+    t = t.split()
+    code = t[-1]
+    print(code)
+    fp.close()
+
+    with open("user_data/user_data.txt", "a") as fp:
+        fp.write("Imena posnetkov:\n")
+
+    text_id = 0
+    txt = []
+    f = open("text/text.txt")
+    for i, line in enumerate(f):
+        txt.append(line[0:-1])
+    f.close()
+
+    text_to_read = "Pritisnite gumb 'Naslednji' (enter/space) in pričnite brati tekst na ekranu"
+
+    def next_recording(self):
+        if self.text_id > len(self.txt):
+            print("konec!")
+            self.fp.close()
+
+        if self.rec is not None:
+            self.rec.stop_recording()
+            self.rec.close()
+        
+        file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
+        self.rec = self.recorder.open(str("recordings/"+file_name))
+        self.rec.start_recording()
+        with open("user_data/user_data.txt", "a") as self.fp:
+            self.fp.write("['{}', '{}']\n".format(file_name, self.txt[self.text_id]))
+        # print(self.txt[self.text_id])
+        self.text_to_read = str(self.txt[self.text_id])
+        self.text_id += 1
+        
     
+class UserDataScreen(Screen):
+    # TODO: dodaj handlanje neizpoljenih obrazcev (popups) in shranjevanje v datoteke z drugačnimi imeni
+    male = ObjectProperty(False)
+    female = ObjectProperty(False)
+
+    def sex_clicked(self, instance, value):
+        if value is True:
+            self.male = True
+            self.female = False
+        else:
+            self.male = False
+            self.female = True
+        print("Male: {}   Female {} ".format(self.male, self.female ))
+        
+
+    def spinner_clicked(self, text):
+        print(text)
+    
+    def save_user_data(self, name, surname, code, region):
+        print("Male: {}   Female {} ".format(self.male, self.female ))
+        print("Name: {}   Surname: {}    Code: {}   Region: {}".format(name, surname, code, region))
+
+        if self.male is True:
+            sex = "m"
+        else:
+            sex = "z"
+
+        data = 'Ime: {}\nPriimek: {}\nSpol: {}\nRegija: {}\nKoda: {}\n'.format(name, surname, sex, region, code)
+        f = open("user_data/user_data.txt", "w")
+        f.write(data)
+    
+
 class SettingScreen(Screen):
     pass
 
@@ -45,10 +118,7 @@ class TestingScreen(Screen):
     recorder = Recorder()
     rec = None
     timer = None
-    # def __init__(self, rec_time=3):
-    #     self.rec_time = rec_time
-    #     self.recorder = Recorder()
-    #     self.rec = None
+
     # Function that records user audio for n seconds and than replays the recording
     def timer_callback(self):
         self.rec.stop_recording()
@@ -89,6 +159,7 @@ screen_manager.add_widget(RecordScreen(name="record_screen"))
 screen_manager.add_widget(SettingScreen(name="settings_screen"))
 screen_manager.add_widget(TestingScreen(name="testing_screen"))
 screen_manager.add_widget(AboutScreen(name="about_screen"))
+screen_manager.add_widget(UserDataScreen(name="user_data_screen"))
 
 
 
