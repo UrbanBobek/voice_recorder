@@ -173,7 +173,7 @@
                 root.manager.current = 'start_screen'
 <RecordScreen>
     FloatLayout:
-        cols: 1
+        next_rec: next_rec
         Label:
             id: screen_text
             text: root.text_to_read
@@ -195,14 +195,14 @@
             
         MyButton:
             text: "Naslednji"
-
+            id: next_rec
             font_size: 32
             bold: True
             pos_hint: {'center_x': 0.5, 'center_y': 0.25}
             size_hint: (0.35, buttonHeight) 
             on_press: 
                 root.next_recording()
-                screen_text.text = root.text_to_read
+                # screen_text.text = root.text_to_read
         MyButton:
             text: "Ponovi"
 
