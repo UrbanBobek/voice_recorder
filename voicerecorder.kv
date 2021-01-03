@@ -39,12 +39,19 @@
                 root.manager.transition.direction = 'up'
                 root.manager.current = 'about_screen'
         MyButton:
-            size_hint: (0.5, 0.3)
-            pos_hint: {'x': 1 - xButtonMargin - 0.5, 'y': yButtonMargin }
+            size_hint: (0.5, 0.2)
+            pos_hint: {'x': 1 - xButtonMargin - 0.5, 'center_y': 0.25 }
             text: "Začetek"
             on_press: 
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'user_data_screen'
+        MyButton:
+            size_hint: (0.5, 0.1)
+            pos_hint: {'x': 1 - xButtonMargin - 0.5, 'center_y': 0.08 }
+            text: "Nadaljuj"
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'record_screen'
         Label:
             text:"VOICE RECORDER :>"
             # size_hint: (0.9, 0.5)
@@ -198,8 +205,8 @@
             id: next_rec
             font_size: 32
             bold: True
-            pos_hint: {'center_x': 0.5, 'center_y': 0.25}
-            size_hint: (0.35, buttonHeight) 
+            pos_hint: {'center_x': 0.5, 'center_y': 0.15}
+            size_hint: (0.3, buttonHeight*1.4) 
             on_press: 
                 root.next_recording()
                 # screen_text.text = root.text_to_read
@@ -208,8 +215,8 @@
 
             font_size: 32
             bold: True
-            pos_hint: {'center_x': 0.5, 'center_y': 0.25 - buttonHeight - 0.015 }
-            size_hint: (0.28, buttonHeight) 
+            pos_hint: {'center_x': 0.25, 'center_y':  0.15 }
+            size_hint: (0.1, buttonHeight) 
             on_press: root.redo_rec()
 
         MyButton:
@@ -217,7 +224,7 @@
 
             font_size: 28
             bold: True
-            pos_hint: {'center_x': 0.8, 'center_y': 0.25}
+            pos_hint: {'center_x': 0.75, 'center_y': 0.15}
             size_hint: (0.1, buttonHeight) 
             on_press: root.playback_rec()
         MyButton:
@@ -225,9 +232,17 @@
 
             font_size: 28
             bold: True
-            pos_hint: {'center_x': 0.2, 'center_y': 0.25}
+            pos_hint: {'center_x': 0.1, 'center_y': 0.15}
             size_hint: (0.1, buttonHeight) 
             on_press: root.one_text_back()
+        MyButton:
+            text: "1 naprej"
+
+            font_size: 28
+            bold: True
+            pos_hint: {'center_x': 0.9, 'center_y': 0.15}
+            size_hint: (0.1, buttonHeight) 
+            on_press: root.one_text_foward()
 
         ReturnButton:
             pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
@@ -270,37 +285,3 @@
                 root.manager.transition.direction = 'down'
                 root.manager.current = 'start_screen'
 
-# <MyLayout>
-#     GridLayout:
-        
-#         size: root.width, root.height
-#         cols: 1
-#         Label:
-#             text: "Hello!"
-#             size_hint: (1, 1.8)
-        
-#         GridLayout:
-#             cols: 2
-#             padding: (10, 10, 10, 10)
-#             spacing: (10, 10)
-#             GridLayout:
-#                 cols: 1
-#                 padding: (40, 0, 40, 0)
-#                 spacing: (10, 10)
-#                 Button:
-#                     size_hint: (0.2, 0.2)
-#                     font_size: 32
-#                     text: "test"
-#                 Button:
-#                     size_hint: (0.2, 0.2)
-#                     font_size: 32
-#                     text: "nastavitve"
-#                 Button:
-#                     size_hint: (0.2, 0.2)
-#                     font_size: 32
-#                     text: "o programu"
-
-#             Button:
-#                 size_hint: (1, 1)
-#                 font_size: 32
-#                 text: "Začetek"

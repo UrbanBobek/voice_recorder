@@ -13,6 +13,9 @@ from recorder import Recorder
 import threading
 import mute_alsa
 
+import os.path
+from os import path
+
 Builder.load_file('voicerecorder.kv')
 
 
@@ -24,14 +27,15 @@ class StartLayout(Screen):
 
 
 class RecordScreen(Screen):
+    # TODO: dodaj kolko je še za prebrat, dodaj lucko ki nakaže ali se snema ali ne, disable-aj next button če naprej še ni posneto, polepšaj zadeve
     next_rec = ObjectProperty(None)
     text_to_read = StringProperty()
+
     # Create Recorder object
     recorder = Recorder()
     rec = None
-    text_id = 0
+
     txt = []
-    rec_file_name = ""
     # Store text lines to read
     f = open("text/text.txt")
     for i, line in enumerate(f):
@@ -42,16 +46,44 @@ class RecordScreen(Screen):
     def __init__(self, **kwargs):
         super(RecordScreen, self).__init__(**kwargs)
         Window.bind(on_key_down=self._on_keyboard_down)
-        self.text_to_read = "Pritisnite gumb 'Naslednji' (enter/space) in pričnite brati tekst na ekranu"
         self.rec_file_name = ""
+        self.text_id = 0
+        self.last_rec_id = 0
+
+        self.enable_keyboard_flag = False
+
+    def on_enter(self, *args):
+        self.enable_keyboard(True)
+
+        self.curr_user, self.code = self.return_user_data()
+        f = open("user_data/{}".format(self.curr_user))
+        file_data = f.readlines()
+        if len(file_data) > 5:
+            self.text_to_read = self.txt[len(file_data)-5]
+            self.text_id = len(file_data)-5
+            self.last_rec_id = len(file_data)-5
+        else:
+            self.text_to_read = "Pritisnite gumb 'Naslednji' (enter/space) in pričnite brati tekst na ekranu"
+            self.text_id = 0
+            self.last_rec_id = 0
+
+    def on_leave(self, *args):
+        self.enable_keyboard(False)
 
     # Button shortcuts
     def _on_keyboard_down(self, instance, keyboard, keycode, text, modifiers):
         # print(keycode)
-        if  keycode == 40 or keycode == 44 or keycode == 79:  # 40 - Enter key pressed, 44 - spacebar, 79 - right arrow key
-            self.next_recording()
-        if  keycode == 82 or keycode == 224:  # 82 - up key, 224 - lctrl
-            self.redo_rec()
+        if self.enable_keyboard_flag:
+            if  keycode == 40 or keycode == 44:  # 40 - Enter key pressed, 44 - spacebar, 79 - right arrow key
+                self.next_recording()
+            if  keycode == 82:  # 82 - up key
+                self.playback_rec()
+            if  keycode == 79:  # 79 - right arrow key
+                self.one_text_foward()
+            if  keycode == 80:  # 80 - left key
+                self.one_text_back()
+            if  keycode == 224:  # 224 - lctrl
+                self.redo_rec()
 
     # Read user code from file
     def return_user_data(self):
@@ -75,44 +107,74 @@ class RecordScreen(Screen):
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
-        
-        curr_user, code = self.return_user_data()
-        self.rec_file_name = "{}_{}.wav".format(code, str(self.text_id).zfill(5))
-        self.rec = self.recorder.open(str("recordings/"+self.rec_file_name))
+
+        self.curr_user, self.code = self.return_user_data()
+        self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
+
+        # Chech if recording already exists
+        file_name = "recordings/{}".format(self.rec_file_name)
+        if not path.exists(file_name):
+            self.last_rec_id +=1
+
+        self.rec = self.recorder.open(file_name)
         self.rec.start_recording()
 
-        with open("user_data/{}".format(curr_user), "a+") as fp:
+        with open("user_data/{}".format(self.curr_user), "a+") as fp:
             fp.write("['{}', '{}']\n".format(self.rec_file_name, self.txt[self.text_id]))
         # print(self.txt[self.text_id])
         self.text_to_read = str(self.txt[self.text_id])
         self.text_id += 1
-    
+
+        print("text id: {}    las rec id: {}".format(self.text_id, self.last_rec_id))
+        
     # playback the audio file of currrent text
     def playback_rec(self):
-        # TODO: spremeni, da predvaja posnetek od teksta, ki je trenutno na ekranu
+        # TODO: preveri, če posnetek obstaja
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
-
-        self.rec = self.recorder.open("recordings/{}".format(self.rec_file_name), mode="rb")
-        self.rec.playback_file()
-    
+        file_name = "recordings/{}".format(self.rec_file_name)
+        if path.exists(file_name):
+            self.rec = self.recorder.open(file_name, mode="rb")
+            self.rec.playback_file()
+        else:
+            pass
+        
+    # Record the current text again (overrides the previous entry)
     def redo_rec(self):
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
             
-        curr_user, code = self.return_user_data()
-        self.rec_file_name = "{}_{}.wav".format(code, str(self.text_id - 1).zfill(5))
+        # curr_user, code = self.return_user_data()
+        self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id - 1).zfill(5))
         self.rec = self.recorder.open(str("recordings/"+self.rec_file_name))
         self.rec.start_recording()
 
+    # Display the previous text
     def one_text_back(self):
         if (self.text_id - 2) < 0:
             self.text_id = 0
         else:
             self.text_id -= 2
-        self.next_recording()
+
+        self.text_to_read = str(self.txt[self.text_id])
+        self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
+
+    # Display the next text
+    def one_text_foward(self):
+        if self.text_id > len(self.txt):
+            print("konec!")
+            self.fp.close()
+        else:
+            self.text_id += 1
+
+        self.text_to_read = str(self.txt[self.text_id])
+        self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
+        # self.next_recording()
+    
+    def enable_keyboard(self, value):
+        self.enable_keyboard_flag = value
     
 class UserDataScreen(Screen):
     # TODO: dodaj handlanje neizpoljenih obrazcev (popups) in shranjevanje v datoteke z drugačnimi imeni
