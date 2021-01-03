@@ -31,23 +31,27 @@ class RecordScreen(Screen):
     rec = None
     text_id = 0
     txt = []
-    
+    rec_file_name = ""
     # Store text lines to read
     f = open("text/text.txt")
     for i, line in enumerate(f):
         txt.append(line[0:-1])
     f.close()
-    # Set initial text
     
 
     def __init__(self, **kwargs):
         super(RecordScreen, self).__init__(**kwargs)
         Window.bind(on_key_down=self._on_keyboard_down)
         self.text_to_read = "Pritisnite gumb 'Naslednji' (enter/space) in pričnite brati tekst na ekranu"
+        self.rec_file_name = ""
 
+    # Button shortcuts
     def _on_keyboard_down(self, instance, keyboard, keycode, text, modifiers):
+        # print(keycode)
         if  keycode == 40 or keycode == 44 or keycode == 79:  # 40 - Enter key pressed, 44 - spacebar, 79 - right arrow key
             self.next_recording()
+        if  keycode == 82 or keycode == 224:  # 82 - up key, 224 - lctrl
+            self.redo_rec()
 
     # Read user code from file
     def return_user_data(self):
@@ -73,16 +77,42 @@ class RecordScreen(Screen):
             self.rec.close()
         
         curr_user, code = self.return_user_data()
-        file_name = "{}_{}.wav".format(code, str(self.text_id).zfill(5))
-        self.rec = self.recorder.open(str("recordings/"+file_name))
+        self.rec_file_name = "{}_{}.wav".format(code, str(self.text_id).zfill(5))
+        self.rec = self.recorder.open(str("recordings/"+self.rec_file_name))
         self.rec.start_recording()
 
         with open("user_data/{}".format(curr_user), "a+") as fp:
-            fp.write("['{}', '{}']\n".format(file_name, self.txt[self.text_id]))
+            fp.write("['{}', '{}']\n".format(self.rec_file_name, self.txt[self.text_id]))
         # print(self.txt[self.text_id])
         self.text_to_read = str(self.txt[self.text_id])
         self.text_id += 1
-        
+    
+    # playback the audio file of currrent text
+    def playback_rec(self):
+        # TODO: spremeni, da predvaja posnetek od teksta, ki je trenutno na ekranu
+        if self.rec is not None:
+            self.rec.stop_recording()
+            self.rec.close()
+
+        self.rec = self.recorder.open("recordings/{}".format(self.rec_file_name), mode="rb")
+        self.rec.playback_file()
+    
+    def redo_rec(self):
+        if self.rec is not None:
+            self.rec.stop_recording()
+            self.rec.close()
+            
+        curr_user, code = self.return_user_data()
+        self.rec_file_name = "{}_{}.wav".format(code, str(self.text_id - 1).zfill(5))
+        self.rec = self.recorder.open(str("recordings/"+self.rec_file_name))
+        self.rec.start_recording()
+
+    def one_text_back(self):
+        if (self.text_id - 2) < 0:
+            self.text_id = 0
+        else:
+            self.text_id -= 2
+        self.next_recording()
     
 class UserDataScreen(Screen):
     # TODO: dodaj handlanje neizpoljenih obrazcev (popups) in shranjevanje v datoteke z drugačnimi imeni

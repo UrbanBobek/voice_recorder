@@ -210,7 +210,7 @@
             bold: True
             pos_hint: {'center_x': 0.5, 'center_y': 0.25 - buttonHeight - 0.015 }
             size_hint: (0.28, buttonHeight) 
-            on_press: # Ponovno začni snemati
+            on_press: root.redo_rec()
 
         MyButton:
             text: "Playback"
@@ -219,7 +219,7 @@
             bold: True
             pos_hint: {'center_x': 0.8, 'center_y': 0.25}
             size_hint: (0.1, buttonHeight) 
-            # on_press: playback
+            on_press: root.playback_rec()
         MyButton:
             text: "1 nazaj"
 
@@ -227,7 +227,7 @@
             bold: True
             pos_hint: {'center_x': 0.2, 'center_y': 0.25}
             size_hint: (0.1, buttonHeight) 
-            # on_press: playback
+            on_press: root.one_text_back()
 
         ReturnButton:
             pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
