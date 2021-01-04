@@ -27,16 +27,17 @@ class StartLayout(Screen):
 
 
 class RecordScreen(Screen):
-    # TODO: dodaj kolko je še za prebrat, dodaj lucko ki nakaže ali se snema ali ne, disable-aj next button če naprej še ni posneto, polepšaj zadeve
+    # TODO: dodaj lucko ki nakaže ali se snema ali ne, polepšaj zadeve
     next_rec = ObjectProperty(None)
     text_to_read = StringProperty()
+    prog_indic = StringProperty()
 
     # Create Recorder object
     recorder = Recorder()
     rec = None
 
+     # Store text lines to read
     txt = []
-    # Store text lines to read
     f = open("text/text.txt")
     for i, line in enumerate(f):
         txt.append(line[0:-1])
@@ -46,11 +47,14 @@ class RecordScreen(Screen):
     def __init__(self, **kwargs):
         super(RecordScreen, self).__init__(**kwargs)
         Window.bind(on_key_down=self._on_keyboard_down)
+        Window.bind(on_key_up=self._on_keyboard_up)
         self.rec_file_name = ""
         self.text_id = 0
         self.last_rec_id = 0
 
         self.enable_keyboard_flag = False
+
+        
 
     def on_enter(self, *args):
         self.enable_keyboard(True)
@@ -67,23 +71,30 @@ class RecordScreen(Screen):
             self.text_id = 0
             self.last_rec_id = 0
 
+        self.prog_indic = "0/{}".format(len(self.txt))
+        self.key_up = True
+
     def on_leave(self, *args):
         self.enable_keyboard(False)
 
     # Button shortcuts
     def _on_keyboard_down(self, instance, keyboard, keycode, text, modifiers):
         # print(keycode)
-        if self.enable_keyboard_flag:
+        if self.enable_keyboard_flag and self.key_up:
+            self.key_up = False
             if  keycode == 40 or keycode == 44:  # 40 - Enter key pressed, 44 - spacebar, 79 - right arrow key
                 self.next_recording()
             if  keycode == 82:  # 82 - up key
                 self.playback_rec()
-            if  keycode == 79:  # 79 - right arrow key
+            if  keycode == 79 and self.text_id + 1 < self.last_rec_id:  # 79 - right arrow key
                 self.one_text_foward()
             if  keycode == 80:  # 80 - left key
                 self.one_text_back()
             if  keycode == 224:  # 224 - lctrl
                 self.redo_rec()
+
+    def _on_keyboard_up(self, instance, keyboard, keycode):
+        self.key_up = True
 
     # Read user code from file
     def return_user_data(self):
@@ -107,6 +118,7 @@ class RecordScreen(Screen):
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
+            self.toggle_rec_dot(False)
 
         self.curr_user, self.code = self.return_user_data()
         self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
@@ -118,21 +130,35 @@ class RecordScreen(Screen):
 
         self.rec = self.recorder.open(file_name)
         self.rec.start_recording()
+        self.toggle_rec_dot(True)
 
         with open("user_data/{}".format(self.curr_user), "a+") as fp:
             fp.write("['{}', '{}']\n".format(self.rec_file_name, self.txt[self.text_id]))
         # print(self.txt[self.text_id])
-        self.text_to_read = str(self.txt[self.text_id])
+        self.change_text( str(self.txt[self.text_id]) )
         self.text_id += 1
+  
+    
+    def change_text(self, text):
+        self.text_to_read = text
+        self.prog_indic = "{}/{}".format(self.text_id+1,len(self.txt))
 
-        print("text id: {}    las rec id: {}".format(self.text_id, self.last_rec_id))
-        
+        # print("text id: {}    las rec id: {}".format(self.text_id+1, self.last_rec_id))
+        # disable "1 foward" button in case no new records are ahead
+        if self.text_id + 1 >= self.last_rec_id:
+            self.ids["1_foward"].disabled = True
+        else:
+            self.ids["1_foward"].disabled = False
+
+
+
     # playback the audio file of currrent text
     def playback_rec(self):
         # TODO: preveri, če posnetek obstaja
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
+            self.toggle_rec_dot(False)
         file_name = "recordings/{}".format(self.rec_file_name)
         if path.exists(file_name):
             self.rec = self.recorder.open(file_name, mode="rb")
@@ -145,11 +171,13 @@ class RecordScreen(Screen):
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
+            self.toggle_rec_dot(False)
             
         # curr_user, code = self.return_user_data()
         self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id - 1).zfill(5))
         self.rec = self.recorder.open(str("recordings/"+self.rec_file_name))
         self.rec.start_recording()
+        self.toggle_rec_dot(True)
 
     # Display the previous text
     def one_text_back(self):
@@ -158,7 +186,12 @@ class RecordScreen(Screen):
         else:
             self.text_id -= 2
 
-        self.text_to_read = str(self.txt[self.text_id])
+        if self.rec is not None:
+            self.rec.stop_recording()
+            self.rec.close()
+            self.toggle_rec_dot(False)
+
+        self.change_text( str(self.txt[self.text_id]) )
         self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
 
     # Display the next text
@@ -169,12 +202,20 @@ class RecordScreen(Screen):
         else:
             self.text_id += 1
 
-        self.text_to_read = str(self.txt[self.text_id])
+        self.change_text( str(self.txt[self.text_id]) )
         self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
         # self.next_recording()
     
     def enable_keyboard(self, value):
         self.enable_keyboard_flag = value
+
+    def toggle_rec_dot(self, value):
+        if value:
+            self.ids["rec_circle_img"].size_hint = (0.05, 0.05)
+            print("Light ON")
+        else:
+            self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
+            print("Light OFF")
     
 class UserDataScreen(Screen):
     # TODO: dodaj handlanje neizpoljenih obrazcev (popups) in shranjevanje v datoteke z drugačnimi imeni
@@ -229,6 +270,7 @@ class TestingScreen(Screen):
     def timer_callback(self):
         self.rec.stop_recording()
         self.rec.close()
+        self.toggle_rec_dot(False)
 
         self.rec = self.recorder.open("temp/test.wav", mode="rb")
         self.rec.playback_file()
@@ -249,6 +291,7 @@ class TestingScreen(Screen):
 
         self.rec = self.recorder.open("temp/test.wav")
         self.rec.start_recording()
+        self.toggle_rec_dot(True)
         self.timer = threading.Timer(self.rec_time, self.timer_callback)
         self.timer.start()
 
