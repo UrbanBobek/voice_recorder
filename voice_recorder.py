@@ -48,7 +48,7 @@ class RecordScreen(Screen):
         super(RecordScreen, self).__init__(**kwargs)
         Window.bind(on_key_down=self._on_keyboard_down)
         Window.bind(on_key_up=self._on_keyboard_up)
-        self.rec_file_name = ""
+        self.rec_file_name = "initial_file_name"
         self.text_id = 0
         self.last_rec_id = 0
 
@@ -151,7 +151,6 @@ class RecordScreen(Screen):
             self.ids["1_foward"].disabled = False
 
 
-
     # playback the audio file of currrent text
     def playback_rec(self):
         # TODO: preveri, če posnetek obstaja
@@ -181,10 +180,10 @@ class RecordScreen(Screen):
 
     # Display the previous text
     def one_text_back(self):
-        if (self.text_id - 2) < 0:
+        if (self.text_id - 1) < 0:
             self.text_id = 0
         else:
-            self.text_id -= 2
+            self.text_id -= 1
 
         if self.rec is not None:
             self.rec.stop_recording()
@@ -216,6 +215,12 @@ class RecordScreen(Screen):
         else:
             self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
             print("Light OFF")
+    
+    def return_button_clicked(self):
+        if self.rec is not None:
+            self.rec.stop_recording()
+            self.rec.close()
+            self.toggle_rec_dot(False)
     
 class UserDataScreen(Screen):
     # TODO: dodaj handlanje neizpoljenih obrazcev (popups) in shranjevanje v datoteke z drugačnimi imeni
@@ -295,7 +300,20 @@ class TestingScreen(Screen):
         self.timer = threading.Timer(self.rec_time, self.timer_callback)
         self.timer.start()
 
-    
+    def toggle_rec_dot(self, value):
+        if value:
+            self.ids["rec_circle_img"].size_hint = (0.05, 0.05)
+            print("Light ON")
+        else:
+            self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
+            print("Light OFF")
+
+    def return_button_clicked(self):
+        if self.rec is not None:
+            self.rec.stop_recording()
+            self.rec.close()
+            self.timer.cancel()
+            self.toggle_rec_dot(False)
 
 class AboutScreen(Screen):
     pass
