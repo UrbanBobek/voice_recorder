@@ -8,6 +8,7 @@
 #:set textInputFontSize 32
 #:set textInputWidth 0.3
 #:set textInputHeight 0.08
+#:set labelFontSize 32
 <MyButton@Button>
     # font_size: app.font_size
     font_size: 32
@@ -280,12 +281,34 @@
 <SettingScreen>
     FloatLayout:
         Label:
-            text: "SETTINGS BABY!"
+            text: "izhodna naprava"
             color: (0,0,0,1)
+            pos_hint: {'center_x': 0.35, 'center_y': 0.8}
+            font_size: labelFontSize
+        Label:
+            text: "vhodna naprava"
+            color: (0,0,0,1)
+            pos_hint: {'center_x': 0.35, 'center_y': 0.7}
+            font_size: labelFontSize
+        Label:
+            text: "velikost teksta"
+            color: (0,0,0,1)
+            pos_hint: {'center_x': 0.35, 'center_y': 0.6}
+            font_size: labelFontSize
+        Label:
+            text: "število kanalov"
+            color: (0,0,0,1)
+            pos_hint: {'center_x': 0.35, 'center_y': 0.4}
+            font_size: labelFontSize*0.8
+        Label:
+            text: "rate"
+            color: (0,0,0,1)
+            pos_hint: {'center_x': 0.35, 'center_y': 0.3}
+            font_size: labelFontSize*0.8
         ReturnButton:
             pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
             on_press: 
-                root.manager.transition.direction = 'right'
+                root.manager.transition.direction = 'left'
                 root.manager.current = 'start_screen'
                 
 <TestingScreen>

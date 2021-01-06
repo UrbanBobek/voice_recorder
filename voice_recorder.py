@@ -9,6 +9,7 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 from recorder import Recorder
+from py_audio_settings import PyAduioSettings
 
 import threading
 import mute_alsa
@@ -53,8 +54,7 @@ class RecordScreen(Screen):
         self.last_rec_id = 0
 
         self.enable_keyboard_flag = False
-
-        
+   
 
     def on_enter(self, *args):
         self.enable_keyboard(True)
@@ -143,7 +143,6 @@ class RecordScreen(Screen):
         self.text_to_read = text
         self.prog_indic = "{}/{}".format(self.text_id+1,len(self.txt))
 
-        # print("text id: {}    las rec id: {}".format(self.text_id+1, self.last_rec_id))
         # disable "1 foward" button in case no new records are ahead
         if self.text_id + 1 >= self.last_rec_id:
             self.ids["1_foward"].disabled = True
@@ -241,6 +240,9 @@ class UserDataScreen(Screen):
         print(text)
     
     def save_user_data(self, name, surname, code, region):
+        name.replace(" ", "")
+        surname.replace(" ", "")
+        code.replace(" ", "")
         print("Male: {}   Female {} ".format(self.male, self.female ))
         print("Name: {}   Surname: {}    Code: {}   Region: {}".format(name, surname, code, region))
         user_data_filename = "{}{}{}.txt".format(name, surname, code)
@@ -262,7 +264,26 @@ class UserDataScreen(Screen):
     
 
 class SettingScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super(SettingScreen, self).__init__(**kwargs)
+        if os.path.isfile('temp/settings.txt'):
+            # Nastavi parametre na vrednosti iz nastavitev
+            print("HAAAALLOOOOOOO")
+            pass
+        else:
+            print("KAJ DAFAKA")
+            pSetting = PyAduioSettings()
+            in_dev = pSetting.return_input_devices()
+            out_dev = pSetting.return_output_devices()
+
+            def_in = pSetting.find_default_device(in_dev)
+            def_out = pSetting.find_default_device(out_dev)
+
+            f = open("temp/settings.txt", "w")
+            f.write("out_dev: {}\n in_dev: {}\n font_size: {}\n num_of_channels: {}\n samp_rate: {}".format(def_in, def_out, 32, 1, 44100))
+            f.close()
+    def dummy_func(self):
+        pass
 
 class TestingScreen(Screen):
     # TODO: Dodaj vizualizacijo zvočnega posnetka - razvidno mora biti ali je glas dovolj jasen in glasen
