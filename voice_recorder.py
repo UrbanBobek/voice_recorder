@@ -272,45 +272,51 @@ class SettingScreen(Screen):
     def_out_dev = StringProperty()
     def_font_size = StringProperty()
 
+    output_devices = []
+    input_devices = []
+    pSetting = PyAduioSettings()
     def __init__(self, **kwargs):
         super(SettingScreen, self).__init__(**kwargs)
         
-        print()
-
-        pSetting = PyAduioSettings()
-        output_devices = pSetting.return_output_devices()
-        input_devices = pSetting.return_input_devices()
+        self.output_devices = self.pSetting.return_output_devices()
+        self.input_devices = self.pSetting.return_input_devices()
 
         # If settings file does not exist, create it and set input/output device to default
         if not os.path.isfile('temp/settings.txt'):
-            def_in = pSetting.find_default_device(input_devices)
-            def_out = pSetting.find_default_device(output_devices)
+            def_in = self.pSetting.find_default_device(self.input_devices)
+            def_out = self.pSetting.find_default_device(self.output_devices)
             
             f = open("temp/settings.txt", "w")
-            f.write("out_dev: {}\nin_dev: {}\nfont_size: {}\nnum_of_channels: {}\nsamp_rate: {}".format(def_in, def_out, 30, 1, 44100))
+            f.write("out_dev: {}\nin_dev: {}\nfont_size: {}\nnum_of_channels: {}\nsamp_rate: {}".format(def_in, def_out, 32, 1, 44100))
             f.close()
 
-            self.def_out_dev = "OUT DEV"
-            self.def_in_dev = "IN DEV"
-            self.def_font_size = "30"
+            def_settings = self.read_settings_file()
+
+            self.def_out_dev = self.pSetting.find_device_by_number(self.output_devices, def_settings[0])
+            self.def_in_dev = self.pSetting.find_device_by_number(self.input_devices, def_settings[1])
+            self.def_font_size = def_settings[2]
+
         # If a settings file exists, set the settings value to the values in file
         else:
             #
             def_settings = self.read_settings_file()
 
-            self.def_out_dev = pSetting.find_device_by_number(output_devices, def_settings[0])
-            self.def_in_dev = pSetting.find_device_by_number(input_devices, def_settings[1])
+            self.def_out_dev = self.pSetting.find_device_by_number(self.output_devices, def_settings[0])
+            self.def_in_dev = self.pSetting.find_device_by_number(self.input_devices, def_settings[1])
             self.def_font_size = def_settings[2]
 
         # Create list of input and output devices
-        self.in_dev = [i[0] for i in input_devices]
-        self.out_dev = [i[0] for i in output_devices]
+        self.in_dev = [i[0] for i in self.input_devices]
+        self.out_dev = [i[0] for i in self.output_devices]
         
         # Create list of font sizes, input channels and sampling rates
         self.font_sizes = ["8", "9", "10", "11", "12", "14", "18", "24", "30", "36", "48", "60", "72"]
         num_of_channels = 1
         samp_rate = 44100
         
+    def spinner_clicked(self, setting, value):
+        self.edit_settings_file(setting, value)
+
 
     def read_settings_file(self):
         f = open("temp/settings.txt", "r")
@@ -321,6 +327,50 @@ class SettingScreen(Screen):
             res.append(line[idx+2:-1])
         
         return res
+    
+    def edit_settings_file(self, setting, value):
+        print("EDIT TEST")
+        print(self.output_devices)
+        print(value)
+        print(str(self.pSetting.find_number_by_device(self.output_devices, str(value) )))
+        f = open("temp/settings.txt", "r")
+        lines = f.readlines()
+        if setting == "output_dev":
+            line = lines[0]
+            idx = line.find(":")
+            line = line[:idx+2] 
+
+            txt = self.pSetting.find_number_by_device( self.output_devices, str(value) )
+            if txt >= 0:
+                line += str(txt)
+            else:
+                line += self.pSetting.find_default_device(self.output_devices)
+            line += "\n"
+            lines[0] = line
+
+        elif setting == "input_dev":
+            line = lines[1]
+            idx = line.find(":")
+            line = line[:idx+2]
+            
+            txt = self.pSetting.find_number_by_device( self.input_devices, str(value) )
+            if txt >= 0:
+                line += str(txt)
+            else:
+                line += self.pSetting.find_default_device(self.input_devices)
+
+            line += "\n"
+            lines[1] = line
+
+        elif setting == "font_size":
+            pass
+
+        f.close()
+        f = open("temp/settings.txt", "w") 
+        for line in lines:
+            f.write(line)
+            print(line)
+        f.close()
 
     def dummy_func(self):
         pass

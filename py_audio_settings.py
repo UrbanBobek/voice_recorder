@@ -38,11 +38,18 @@ class PyAduioSettings():
 				return sublist[0]
 		return -1
 
+	def find_number_by_device(self, device_list, device_name):
+		for i, sublist in enumerate(device_list):
+			# print(sublist)
+			if device_name == sublist[0]:
+				return sublist[1]
+		return -1
 
-# pyA = PyAduioSettings()
-# # pyA.return_input_devices()
-# out_dev = pyA.return_output_devices()
-# print(out_dev)
+pyA = PyAduioSettings()
+# pyA.return_input_devices()
+out_dev = pyA.return_output_devices()
+print(out_dev)
 # print(pyA.find_device_by_number(out_dev, '2'))
+print(pyA.find_number_by_device(out_dev, 'HDA NVidia: HDMI 0 (hw:1,3)'))
 
 
