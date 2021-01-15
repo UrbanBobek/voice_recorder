@@ -31,11 +31,18 @@ class PyAduioSettings():
 				return sublist[1]
 		return -1
 
+	def find_device_by_number(self, device_list, device_num):
+		for i, sublist in enumerate(device_list):
+			# print(sublist)
+			if device_num == str(sublist[1]):
+				return sublist[0]
+		return -1
+
 
 # pyA = PyAduioSettings()
 # # pyA.return_input_devices()
 # out_dev = pyA.return_output_devices()
 # print(out_dev)
-# print(pyA.find_default_device(out_dev))
+# print(pyA.find_device_by_number(out_dev, '2'))
 
 
