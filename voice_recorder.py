@@ -307,6 +307,11 @@ class SettingScreen(Screen):
     input_devices = []
     pSetting = PyAduioSettings()
 
+    rec_time = 3
+    recorder = Recorder()
+    rec = None
+    timer = None
+
     def __init__(self, **kwargs):
         super(SettingScreen, self).__init__(**kwargs)
         
@@ -397,16 +402,6 @@ class SettingScreen(Screen):
             # print(line)
         f.close()
 
-    def dummy_func(self):
-        pass
-
-class TestingScreen(Screen):
-    # TODO: Dodaj vizualizacijo zvočnega posnetka - razvidno mora biti ali je glas dovolj jasen in glasen
-    rec_time = 3
-    recorder = Recorder()
-    rec = None
-    timer = None
-
     # Function that records user audio for n seconds and than replays the recording
     def timer_callback(self):
         self.rec.stop_recording()
@@ -451,6 +446,58 @@ class TestingScreen(Screen):
             self.timer.cancel()
             self.toggle_rec_dot(False)
 
+
+# class TestingScreen(Screen):
+#     # TODO: Dodaj vizualizacijo zvočnega posnetka - razvidno mora biti ali je glas dovolj jasen in glasen
+#     rec_time = 3
+#     recorder = Recorder()
+#     rec = None
+#     timer = None
+
+#     # Function that records user audio for n seconds and than replays the recording
+#     def timer_callback(self):
+#         self.rec.stop_recording()
+#         self.rec.close()
+#         self.toggle_rec_dot(False)
+
+#         self.rec = self.recorder.open("temp/test.wav", mode="rb")
+#         self.rec.playback_file()
+#         self.timer = threading.Timer(self.rec_time, self.timer_callback_close)
+#         self.timer.start()
+    
+#     def timer_callback_close(self):
+#         self.rec.close()
+#         self.timer = None
+
+#     def test_audio(self):
+#         if self.rec is not None:
+#             self.rec.close()
+        
+#         if self.timer is not None:
+#             self.timer.cancel()
+#             self.rec.close()
+
+#         self.rec = self.recorder.open("temp/test.wav")
+#         self.rec.start_recording()
+#         self.toggle_rec_dot(True)
+#         self.timer = threading.Timer(self.rec_time, self.timer_callback)
+#         self.timer.start()
+
+#     def toggle_rec_dot(self, value):
+#         if value:
+#             self.ids["rec_circle_img"].size_hint = (0.05, 0.05)
+#             print("Light ON")
+#         else:
+#             self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
+#             print("Light OFF")
+
+#     def return_button_clicked(self):
+#         if self.rec is not None:
+#             self.rec.stop_recording()
+#             self.rec.close()
+#             self.timer.cancel()
+#             self.toggle_rec_dot(False)
+
 class AboutScreen(Screen):
     pass
 
@@ -460,7 +507,7 @@ screen_manager = ScreenManager()
 screen_manager.add_widget(StartLayout(name="start_screen"))
 screen_manager.add_widget(RecordScreen(name="record_screen"))
 screen_manager.add_widget(SettingScreen(name="settings_screen"))
-screen_manager.add_widget(TestingScreen(name="testing_screen"))
+# screen_manager.add_widget(TestingScreen(name="testing_screen"))
 screen_manager.add_widget(AboutScreen(name="about_screen"))
 screen_manager.add_widget(UserDataScreen(name="user_data_screen"))
 
