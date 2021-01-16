@@ -26,18 +26,21 @@
         MyButton:
             pos_hint: {'x': xButtonMargin, 'y': 3*yButtonMargin +2*buttonHeight }
             text: "test"
+            font_size: root.font_size_ui
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'testing_screen'
         MyButton:
             pos_hint: {'x': xButtonMargin, 'y': 2*yButtonMargin + buttonHeight }
             text: "nastavitve"
+            font_size: root.font_size_ui
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'settings_screen'
         MyButton:
             pos_hint: {'x': xButtonMargin, 'y': yButtonMargin }
             text: "o programu"
+            font_size: root.font_size_ui
             on_press: 
                 root.manager.transition.direction = 'up'
                 root.manager.current = 'about_screen'
@@ -45,6 +48,7 @@
             size_hint: (0.5, 0.2)
             pos_hint: {'x': 1 - xButtonMargin - 0.5, 'center_y': 0.25 }
             text: "Začetek"
+            font_size: root.font_size_ui
             on_press: 
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'user_data_screen'
@@ -52,6 +56,7 @@
             size_hint: (0.5, 0.1)
             pos_hint: {'x': 1 - xButtonMargin - 0.5, 'center_y': 0.08 }
             text: "Nadaljuj"
+            font_size: root.font_size_ui
             on_press: 
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'record_screen'
@@ -68,7 +73,7 @@
         Label:
             text: "Ime"
 
-            font_size: 32
+            font_size: root.font_size_ui
             color: (0,0,0,1)
             bold: True
             pos_hint: {'center_x': xTextInputMargin -0.1, 'center_y': 0.7+textInputHeight/2}
@@ -84,7 +89,7 @@
         Label:
             text: "Priimek"
 
-            font_size: 32
+            font_size: root.font_size_ui
             color: (0,0,0,1)
             bold: True
             pos_hint: {'center_x': xTextInputMargin -0.1, 'center_y': (0.7 - textInputHeight - yTextInputMargin) + textInputHeight/2}
@@ -93,14 +98,14 @@
             text: ""
             multiline: False
             write_tab: False
-            font_size: textInputFontSize
+            font_size: root.font_size_ui
             size_hint: (textInputWidth, textInputHeight)
             pos_hint: {'x': xTextInputMargin, 'y': 0.7 - textInputHeight - yTextInputMargin}
 
         Label:
             text: "Koda"
 
-            font_size: 32
+            font_size: root.font_size_ui
             color: (0,0,0,1)
             bold: True
             pos_hint: {'center_x': xTextInputMargin -0.1, 'center_y': (0.7 - 2*textInputHeight - 2*yTextInputMargin) + textInputHeight/2}
@@ -109,14 +114,14 @@
             text: ""
             multiline: False
             write_tab: False
-            font_size: textInputFontSize
+            font_size: root.font_size_ui
             size_hint: (textInputWidth, textInputHeight)
             pos_hint: {'x': xTextInputMargin, 'y': 0.7 - 2*textInputHeight - 2*yTextInputMargin}
 
         Label:
             text: "Regija"
 
-            font_size: 32
+            font_size: root.font_size_ui
             color: (0,0,0,1)
             bold: True
             pos_hint: {'center_x': xTextInputMargin -0.1, 'center_y': (0.7- 3*textInputHeight - 3*yTextInputMargin) + textInputHeight/2}
@@ -125,7 +130,7 @@
             text: "Izberi regijo"
             
             values: [ "Gorenjska", "Štajerska", "Prekmurje", "Koroška",  "Notranjska", "Primorska", "Dolenjska"]
-            font_size: textInputFontSize
+            font_size: root.font_size_ui
             size_hint: (textInputWidth, textInputHeight)
             pos_hint: {'x': xTextInputMargin, 'y': 0.7- 3*textInputHeight - 3*yTextInputMargin}
             on_text: root.spinner_clicked(spinner_id.text)
@@ -133,12 +138,12 @@
         Label:
             text: "Spol"
             bold: True
-            font_size: 32
+            font_size: root.font_size_ui
             color: (0,0,0,1)
             pos_hint: {'center_x': 0.75, 'center_y': 0.75}
         Label:
             text: "Moški"
-            font_size: 20
+            font_size: root.font_size_ui
             color: (0,0,0,1)
             pos_hint: {'center_x': 0.7, 'center_y': 0.7}
         CheckBox:
@@ -150,7 +155,7 @@
             on_active: root.sex_clicked(self, self.active)
         Label:
             text: "Ženski"
-            font_size: 20
+            font_size: root.font_size_ui
             color: (0,0,0,1)
             pos_hint: {'center_x': 0.8, 'center_y': 0.7}
         CheckBox:
@@ -163,7 +168,7 @@
 
         MyButton:   
             text: "Začni"
-
+            font_size: root.font_size_ui
             pos_hint: {'x': 1 - 0.3 - xButtonMargin, 'y': yButtonMargin}
             size_hint: (0.3, buttonHeight) 
             on_press: 
@@ -172,6 +177,7 @@
                 root.save_user_data(name_input.text, surname_input.text, code_input.text, spinner_id.text)
         ReturnButton:
             pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
+            font_size: root.font_size_ui
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'start_screen'
@@ -183,7 +189,7 @@
             text: root.text_to_read
             text_size: self.width, None
             # size_hint: 1, None
-            font_size: 40
+            font_size: root.font_size_ui*1.5
             height: self.texture_size[1]
             size_hint: (0.8, 0.5)
             pos_hint: {'center_x': 0.5, 'center_y': 0.65}
@@ -202,7 +208,7 @@
         MyButton:
             text: "Naslednji"
             id: next_rec
-            font_size: 32
+            font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.5, 'center_y': 0.15}
             size_hint: (0.3, buttonHeight*1.6) 
@@ -220,7 +226,7 @@
             text: ""#"Ponovi"
 
             background_normal: 'images/redo_7.png'
-            font_size: 32
+            font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.25, 'center_y':  0.15 }
             size_hint: (buttonHeight2*root.height/root.width, buttonHeight2) 
@@ -230,7 +236,7 @@
             text: "" #"Playback"
 
             background_normal: 'images/play_5.png'
-            font_size: 28
+            font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.75, 'center_y': 0.15}
             # size_hint: (0.1, buttonHeight) 
@@ -240,7 +246,7 @@
             text: "" #"1 nazaj"
 
             background_normal: 'images/left.png'
-            font_size: 28
+            font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.1, 'center_y': 0.15}
             size_hint: (buttonHeight3*root.height/root.width, buttonHeight3) 
@@ -251,7 +257,7 @@
             id: 1_foward
 
             background_normal: 'images/right.png'
-            font_size: 28
+            font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.9, 'center_y': 0.15}
             size_hint: (buttonHeight3*root.height/root.width, buttonHeight3) 
@@ -260,6 +266,7 @@
 
         ReturnButton:
             pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
+            font_size: root.font_size_ui
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'start_screen'
@@ -267,7 +274,7 @@
         Label:
             id: progress_indicator
             text: root.prog_indic
-            font_size: 28
+            font_size: root.font_size_ui
             size_hint: (0.15, 1)
             pos_hint: {'center_x': 0.9, 'center_y': 0.85}
             color: (0,0,0,1)
@@ -276,36 +283,37 @@
     FloatLayout:
         Label:
             text: "izhodna naprava"
+            font_size: root.font_size_ui
             color: (0,0,0,1)
             pos_hint: {'center_x': 0.35, 'center_y': 0.8}
-            font_size: labelFontSize
+            # font_size: labelFontSize
         Label:
             text: "vhodna naprava"
             color: (0,0,0,1)
             pos_hint: {'center_x': 0.35, 'center_y': 0.7}
-            font_size: labelFontSize
+            font_size: root.font_size_ui
         Label:
             text: "velikost teksta"
             color: (0,0,0,1)
             pos_hint: {'center_x': 0.35, 'center_y': 0.6}
-            font_size: labelFontSize
+            font_size: root.font_size_ui
         Label:
             text: "število kanalov"
             color: (0,0,0,1)
             pos_hint: {'center_x': 0.35, 'center_y': 0.4}
-            font_size: labelFontSize*0.8
+            font_size: root.font_size_ui*0.8
         Label:
             text: "rate"
             color: (0,0,0,1)
             pos_hint: {'center_x': 0.35, 'center_y': 0.3}
-            font_size: labelFontSize*0.8
+            font_size: root.font_size_ui*0.8
 
         Spinner:
             id:spinner_in_id
             text: root.def_in_dev
             
             values: root.in_dev#["1", "2", "3"]
-            font_size: textInputFontSize
+            font_size: root.font_size_ui
             size_hint: (textInputWidth, textInputHeight)
             pos_hint: {'center_x': 0.7, 'center_y': 0.7}
             on_text: root.spinner_clicked("input_dev", spinner_in_id.text)
@@ -314,7 +322,7 @@
             text: root.def_out_dev
             
             values: root.out_dev#["1", "2", "3"]
-            font_size: textInputFontSize
+            font_size: root.font_size_ui
             size_hint: (textInputWidth, textInputHeight)
             pos_hint: {'center_x': 0.7, 'center_y': 0.8}
             on_text: root.spinner_clicked("output_dev", spinner_out_id.text)
@@ -323,13 +331,14 @@
             text: root.def_font_size
             
             values: root.font_sizes
-            font_size: textInputFontSize
+            font_size: root.font_size_ui
             size_hint: (textInputWidth, textInputHeight)
             pos_hint: {'center_x': 0.7, 'center_y': 0.6}
-            # on_text: root.spinner_clicked(spinner_id.text)
+            on_text: root.spinner_clicked("font_size", spinner_font_id.text)
 
         ReturnButton:
             pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
+            font_size: root.font_size_ui
             on_press: 
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'start_screen'

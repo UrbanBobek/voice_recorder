@@ -10,6 +10,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 
 from recorder import Recorder
 from py_audio_settings import PyAduioSettings
+from utils import read_settings_file
 
 import threading
 import mute_alsa
@@ -24,7 +25,17 @@ Builder.load_file('voicerecorder.kv')
 # Window.size = (500, 700)
 
 class StartLayout(Screen):
-    pass
+    font_size_ui = ObjectProperty(32)
+
+    def __init__(self, **kwargs):
+        super(StartLayout, self).__init__(**kwargs)
+
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
+    
+    def on_enter(self, *args):
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
 
 
 class RecordScreen(Screen):
@@ -32,6 +43,7 @@ class RecordScreen(Screen):
     next_rec = ObjectProperty(None)
     text_to_read = StringProperty()
     prog_indic = StringProperty()
+    font_size_ui = ObjectProperty(32)
 
     # Create Recorder object
     recorder = Recorder()
@@ -54,7 +66,9 @@ class RecordScreen(Screen):
         self.last_rec_id = 0
 
         self.enable_keyboard_flag = False
-   
+
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
 
     def on_enter(self, *args):
         self.enable_keyboard(True)
@@ -73,6 +87,11 @@ class RecordScreen(Screen):
 
         self.prog_indic = "0/{}".format(len(self.txt))
         self.key_up = True
+
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
+
+        print(read_settings_file())
 
     def on_leave(self, *args):
         self.enable_keyboard(False)
@@ -225,6 +244,17 @@ class UserDataScreen(Screen):
     # TODO: dodaj handlanje neizpoljenih obrazcev (popups) in shranjevanje v datoteke z drugačnimi imeni
     male = ObjectProperty(False)
     female = ObjectProperty(False)
+    font_size_ui = ObjectProperty(32)
+
+    def __init__(self, **kwargs):
+        super(UserDataScreen, self).__init__(**kwargs)
+
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
+    
+    def on_enter(self, *args):
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
 
     def sex_clicked(self, instance, value):
         if value is True:
@@ -267,6 +297,7 @@ class SettingScreen(Screen):
     in_dev = ObjectProperty([""])
     out_dev = ObjectProperty([""])
     font_sizes = ObjectProperty([""])
+    font_size_ui = ObjectProperty(72)
 
     def_in_dev = StringProperty()
     def_out_dev = StringProperty()
@@ -275,6 +306,7 @@ class SettingScreen(Screen):
     output_devices = []
     input_devices = []
     pSetting = PyAduioSettings()
+
     def __init__(self, **kwargs):
         super(SettingScreen, self).__init__(**kwargs)
         
@@ -290,16 +322,15 @@ class SettingScreen(Screen):
             f.write("out_dev: {}\nin_dev: {}\nfont_size: {}\nnum_of_channels: {}\nsamp_rate: {}".format(def_in, def_out, 32, 1, 44100))
             f.close()
 
-            def_settings = self.read_settings_file()
-
+            def_settings = read_settings_file()
+            
             self.def_out_dev = self.pSetting.find_device_by_number(self.output_devices, def_settings[0])
             self.def_in_dev = self.pSetting.find_device_by_number(self.input_devices, def_settings[1])
             self.def_font_size = def_settings[2]
 
         # If a settings file exists, set the settings value to the values in file
         else:
-            #
-            def_settings = self.read_settings_file()
+            def_settings = read_settings_file()
 
             self.def_out_dev = self.pSetting.find_device_by_number(self.output_devices, def_settings[0])
             self.def_in_dev = self.pSetting.find_device_by_number(self.input_devices, def_settings[1])
@@ -310,29 +341,14 @@ class SettingScreen(Screen):
         self.out_dev = [i[0] for i in self.output_devices]
         
         # Create list of font sizes, input channels and sampling rates
-        self.font_sizes = ["8", "9", "10", "11", "12", "14", "18", "24", "30", "36", "48", "60", "72"]
+        self.font_sizes = ["8", "9", "10", "11", "12", "14", "18", "24", "30", "36", "48", "60", "72", "96"]
         num_of_channels = 1
         samp_rate = 44100
         
     def spinner_clicked(self, setting, value):
         self.edit_settings_file(setting, value)
-
-
-    def read_settings_file(self):
-        f = open("temp/settings.txt", "r")
-        lines = f.readlines()
-        res = []
-        for line in lines:
-            idx = line.find(":")
-            res.append(line[idx+2:-1])
-        
-        return res
     
     def edit_settings_file(self, setting, value):
-        print("EDIT TEST")
-        print(self.output_devices)
-        print(value)
-        print(str(self.pSetting.find_number_by_device(self.output_devices, str(value) )))
         f = open("temp/settings.txt", "r")
         lines = f.readlines()
         if setting == "output_dev":
@@ -363,13 +379,22 @@ class SettingScreen(Screen):
             lines[1] = line
 
         elif setting == "font_size":
-            pass
+            line = lines[2]
+            idx = line.find(":")
+            line = line[:idx+2]
+            line += str(value)
+            line += "\n"
+            lines[2] = line
+
+            # Change the font size
+            print(value)
+            self.font_size_ui = int(value)
 
         f.close()
         f = open("temp/settings.txt", "w") 
         for line in lines:
             f.write(line)
-            print(line)
+            # print(line)
         f.close()
 
     def dummy_func(self):
