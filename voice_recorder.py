@@ -10,7 +10,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 
 from recorder import Recorder
 from py_audio_settings import PyAduioSettings
-from utils import read_settings_file
+from utils import *
 
 import threading
 import mute_alsa
@@ -39,7 +39,6 @@ class StartLayout(Screen):
 
 
 class RecordScreen(Screen):
-    # TODO: dodaj lucko ki nakaže ali se snema ali ne, polepšaj zadeve
     next_rec = ObjectProperty(None)
     text_to_read = StringProperty()
     prog_indic = StringProperty()
@@ -64,7 +63,6 @@ class RecordScreen(Screen):
         self.rec_file_name = "initial_file_name"
         self.text_id = 0
         self.last_rec_id = 0
-
         self.enable_keyboard_flag = False
 
         settings = read_settings_file()
@@ -137,12 +135,13 @@ class RecordScreen(Screen):
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
+            self.rec = None
             self.toggle_rec_dot(False)
 
         self.curr_user, self.code = self.return_user_data()
         self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
 
-        # Chech if recording already exists
+        # Check if recording already exists
         file_name = "recordings/{}".format(self.rec_file_name)
         if not path.exists(file_name):
             self.last_rec_id +=1
@@ -171,10 +170,10 @@ class RecordScreen(Screen):
 
     # playback the audio file of currrent text
     def playback_rec(self):
-        # TODO: preveri, če posnetek obstaja
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
+            self.rec = None
             self.toggle_rec_dot(False)
         file_name = "recordings/{}".format(self.rec_file_name)
         if path.exists(file_name):
@@ -188,6 +187,7 @@ class RecordScreen(Screen):
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
+            self.rec = None
             self.toggle_rec_dot(False)
             
         # curr_user, code = self.return_user_data()
@@ -206,6 +206,7 @@ class RecordScreen(Screen):
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
+            self.rec = None
             self.toggle_rec_dot(False)
 
         self.change_text( str(self.txt[self.text_id]) )
@@ -233,11 +234,16 @@ class RecordScreen(Screen):
         else:
             self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
             print("Light OFF")
+            file_name = "recordings/{}".format(self.rec_file_name)
+            file_name_trimmed = "recordings/trimmed/{}".format(self.rec_file_name)
+            audio_trimmed = trim_and_silence_audio_file(file_name)
+            audio_trimmed.export(file_name_trimmed, format="wav")
     
     def return_button_clicked(self):
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
+            self.rec = None
             self.toggle_rec_dot(False)
     
 class UserDataScreen(Screen):

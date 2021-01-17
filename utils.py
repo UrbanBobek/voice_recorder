@@ -1,13 +1,8 @@
-from pydub import AudioSegment
+from pydub import AudioSegment,silence
 import pyaudio
 import wave
-import contextlib
-import audioop
-import numpy as np
-import matplotlib.pyplot as plt
-import math
-import sys
-from pylab import *
+
+
 # Returns current settings in seting file
 def read_settings_file():
     f = open("temp/settings.txt", "r")
@@ -20,61 +15,46 @@ def read_settings_file():
     
     return res
 
-# p = pyaudio.PyAudio()
+# Returns the time of the begging and end of periods of silence in milliseconds
+def return_silence_start_and_stop(filename):
+    myaudio = intro = AudioSegment.from_wav(filename) 
+    song_duration = round(myaudio.duration_seconds*1000)
+    dBFS=myaudio.dBFS
+    sil = silence.detect_silence(myaudio, min_silence_len=500, silence_thresh=dBFS-16)
 
-# CHUNK = 1024
-# FORMAT = pyaudio.paInt16
-# CHANNELS = 1
-# RATE = 44100
-# WAVE_OUTPUT_FILENAME = "silenced.wav"
-# RECORD_SECONDS = 0
-# with contextlib.closing(wave.open("recordings/007_00003.wav",'r')) as f:
-#     frames = f.getnframes()
-#     rate = f.getframerate()
-#     RECORD_SECONDS = frames / float(rate)
+    sil = [((start),(stop)) for start,stop in sil] #in millisec
+    # print(sil)
+    if len(sil) > 2:
+        sil = [sil[0], sil[-1]]
 
+    # handle exceptions:
+    if len(sil) == 1:
+        # The silence in in the begging or in the middle of the audio file
+        if sil[0][1] < song_duration:
+            sil = [sil[0], (song_duration, song_duration)]
+        else:
+            sil = [(0,0),sil[0]]
 
-# stream = p.open(format=FORMAT,
-#                 channels=CHANNELS,
-#                 rate=RATE,
-#                 input=True,
-#                 frames_per_buffer=CHUNK)
+    if len(sil) == 0:
+        sil = [(0,0), (song_duration, song_duration)]
 
-# rms = []
-# for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-#     data = stream.read(CHUNK)
-#     rms.append(audioop.rms(data, 2))    # here's where you calculate the volume
+    print(sil)
+    padding = 200 # milliseconds
+    if sil[0][1] > padding:
+        sil[0] = (sil[0][0], sil[0][1] - padding)
+    if sil[1][0] < (song_duration - padding):
+        sil[1] = (sil[1][0] + padding, sil[1][1])
+    print(sil)
+    return sil
 
-# stream.stop_stream()
-# stream.close()
-# p.terminate()
+def trim_and_silence_audio_file(filename):
+    trim_time = return_silence_start_and_stop(filename)
+    audio = AudioSegment.from_wav(filename)
+    audio_trimmed = audio[trim_time[0][1]:trim_time[1][0]]
+    silent_audio = AudioSegment.silent(duration=300) # 500 milliseconds of silence
+    audio_trimmed = silent_audio + audio_trimmed + silent_audio
 
-# rms =[20*math.log(r, 10) for r in rms]
-# plt.plot(rms[1:])
-# plt.ylabel('some numbers')
-# plt.show()
+    return audio_trimmed
 
-
-spf = wave.open("recordings/007_00003.wav",'r')
-sound_info = spf.readframes(-1)
-sound_info = fromstring(sound_info, 'Int16')
-
-plt.plot(sound_info/30000)
-plt.ylabel('some numbers')
-plt.show()
-
-
-# song = AudioSegment.from_wav("recordings/007_00000.wav")
-
-# print(song.duration_seconds)
-# second = 1 * 2000
-
-# first_second = song[:second]
-
-# ending = song[-2000:]
-
-# beginning = first_second + 6
-# end = ending - 3
-# without_the_middle = beginning + end
-
-# without_the_middle.export("mashup.wav", format="wav")
+audio_trimmed = trim_and_silence_audio_file("recordings/trimmed/69_00002.wav")
+audio_trimmed.export("test.wav", format="wav")
