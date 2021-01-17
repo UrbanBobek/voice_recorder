@@ -49,11 +49,11 @@ class RecordScreen(Screen):
     rec = None
 
      # Store text lines to read
-    txt = []
-    f = open("text/text.txt")
-    for i, line in enumerate(f):
-        txt.append(line[0:-1])
-    f.close()
+    txt = return_text_from_xlsx("text/Artur-B-G0042.xlsx")
+    # f = open("text/text.txt")
+    # for i, line in enumerate(f):
+    #     txt.append(line[0:-1])
+    # f.close()
     
 
     def __init__(self, **kwargs):

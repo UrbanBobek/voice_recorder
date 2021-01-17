@@ -1,7 +1,7 @@
 from pydub import AudioSegment,silence
 import pyaudio
 import wave
-
+import pandas as pd
 
 # Returns current settings in seting file
 def read_settings_file():
@@ -38,23 +38,36 @@ def return_silence_start_and_stop(filename):
     if len(sil) == 0:
         sil = [(0,0), (song_duration, song_duration)]
 
-    print(sil)
     padding = 200 # milliseconds
     if sil[0][1] > padding:
         sil[0] = (sil[0][0], sil[0][1] - padding)
     if sil[1][0] < (song_duration - padding):
         sil[1] = (sil[1][0] + padding, sil[1][1])
-    print(sil)
+
     return sil
 
 def trim_and_silence_audio_file(filename):
     trim_time = return_silence_start_and_stop(filename)
     audio = AudioSegment.from_wav(filename)
     audio_trimmed = audio[trim_time[0][1]:trim_time[1][0]]
-    silent_audio = AudioSegment.silent(duration=300) # 500 milliseconds of silence
+    silent_audio = AudioSegment.silent(duration=300) # 300 milliseconds of silence
     audio_trimmed = silent_audio + audio_trimmed + silent_audio
 
     return audio_trimmed
 
-audio_trimmed = trim_and_silence_audio_file("recordings/trimmed/69_00002.wav")
-audio_trimmed.export("test.wav", format="wav")
+# Return a list of sentences to be recorded
+def return_text_from_xlsx(file_name):
+    dfs = pd.read_excel(file_name, sheet_name="povedi_za_snemanje")
+    cols = [col for col in dfs.columns]
+
+    # last column contains sentences
+    lines = dfs[cols[-1]]
+    txt = [line for line in lines]
+
+    return txt
+
+
+# txt = return_text_from_xlsx("text/Artur-B-G0042.xlsx")
+# print(txt)
+
+
