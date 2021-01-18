@@ -18,7 +18,15 @@
     font_size: 20
     size_hint: (0.1, 0.1)
 
-
+# <MyPopup@Popup>
+#     auto_dismiss: True
+#     title: "Opozorilo"
+#     size_hint: 0.3, 0.2
+#     pos_hint: {"center_x": 0.5, "center_y":0.5}
+#     Button:
+#         text: "Zapri"
+#         font_size: 32
+#         on_release: root.dismiss()
 <StartLayout>
     FloatLayout:
         size: root.width, root.height
@@ -181,6 +189,20 @@
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'start_screen'
+        
+        MyButton:
+            text: "Popup test"
+            on_press: root.show_popup("BALLS")
+
+<Pop_up>:
+    Label:
+        text:"Opozorilo"
+        font_size: root.f_size_ui
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        size_hint: (1, 1)
+
+
+
 <RecordScreen>
     FloatLayout:
         next_rec: next_rec

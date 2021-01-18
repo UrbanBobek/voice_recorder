@@ -7,6 +7,8 @@ from kivy.properties import ObjectProperty, StringProperty
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.popup import Popup
+from kivy.uix.floatlayout import FloatLayout
 
 from recorder import Recorder
 from py_audio_settings import PyAduioSettings
@@ -297,6 +299,18 @@ class UserDataScreen(Screen):
         f = open("temp/curr_user_data.txt", "w")
         f.write("{}\n".format(user_data_filename))
         f.write(data)
+    
+    class Pop_up(FloatLayout):
+        settings = read_settings_file()
+        font_size_ui = int(settings[2])
+        f_size_ui = ObjectProperty(font_size_ui)
+        pass
+
+    def show_popup(self, txt):
+        show = self.Pop_up()
+
+        popup_window = Popup(title=txt, content=show, size_hint=(0.3, 0.2), auto_dismiss = True)
+        popup_window.open()
     
 
 class SettingScreen(Screen):
