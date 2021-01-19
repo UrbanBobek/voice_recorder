@@ -180,8 +180,8 @@
             pos_hint: {'x': 1 - 0.3 - xButtonMargin, 'y': yButtonMargin}
             size_hint: (0.3, buttonHeight) 
             on_press: 
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'record_screen'
+                # root.manager.transition.direction = 'left'
+                # root.manager.current = 'record_screen'
                 root.save_user_data(name_input.text, surname_input.text, code_input.text, spinner_id.text)
         ReturnButton:
             pos_hint: {'x': 0.02, 'y': 1 - buttonHeight - yButtonMargin}
@@ -190,16 +190,20 @@
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'start_screen'
         
-        MyButton:
-            text: "Popup test"
-            on_press: root.show_popup("BALLS")
 
-<Pop_up>:
-    Label:
-        text:"Opozorilo"
-        font_size: root.f_size_ui
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-        size_hint: (1, 1)
+<Pop_up>:  
+    # title: "Opozorilo"
+    title_size: root.font_size_ui*0.6
+    title_align: "center"
+    size_hint:(0.3, 0.2)
+    auto_dismiss:True
+
+    Button:
+        text:"Zapri"
+        font_size: root.font_size_ui
+    #     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    #     size_hint: (1, 1)
+        on_press: root.dismiss()
 
 
 

@@ -20,7 +20,7 @@ import mute_alsa
 import os.path
 from os import path
 
-Builder.load_file('voicerecorder.kv')
+Builder.load_file('voicerecorder_layout.kv')
 
 
 # Set app size
@@ -289,28 +289,53 @@ class UserDataScreen(Screen):
             sex = "m"
         else:
             sex = "z"
-
-        data = 'Ime: {}\nPriimek: {}\nSpol: {}\nRegija: {}\nKoda: {}\n'.format(name, surname, sex, region, code)
-        f = open("user_data/{}".format(user_data_filename), "w")
-        f.write(data)
-        f.close()
         
-        # Save who is the current subject to temp folder
-        f = open("temp/curr_user_data.txt", "w")
-        f.write("{}\n".format(user_data_filename))
-        f.write(data)
+        all_data_submited = True
+        if not self.male and not self.female:
+            popup_text = "Manjka spol" 
+            all_data_submited = False
+        if region == "Izberi regijo":
+            popup_text = "Manjka regija" 
+            all_data_submited = False
+        if not code:
+            popup_text = "Manjka koda"
+            all_data_submited = False 
+        if not surname:
+            popup_text = "Manjka priimek"
+            all_data_submited = False
+        if not name:
+            popup_text = "Manjka ime"
+            all_data_submited = False 
+         
+        if all_data_submited:
+            data = 'Ime: {}\nPriimek: {}\nSpol: {}\nRegija: {}\nKoda: {}\n'.format(name, surname, sex, region, code)
+            f = open("user_data/{}".format(user_data_filename), "w")
+            f.write(data)
+            f.close()
+        
+            # Save who is the current subject to temp folder
+            f = open("temp/curr_user_data.txt", "w")
+            f.write("{}\n".format(user_data_filename))
+            f.write(data)
+            
+            # Go to record screen
+            screen_manager.transition.direction = 'left'
+            screen_manager.current = "record_screen"
+        else:
+            self.show_popup(popup_text)
+        
     
-    class Pop_up(FloatLayout):
+    class Pop_up(Popup):
         settings = read_settings_file()
         font_size_ui = int(settings[2])
         f_size_ui = ObjectProperty(font_size_ui)
         pass
 
     def show_popup(self, txt):
-        show = self.Pop_up()
-
-        popup_window = Popup(title=txt, content=show, size_hint=(0.3, 0.2), auto_dismiss = True)
-        popup_window.open()
+        the_popup = self.Pop_up()
+        the_popup.title = txt
+        #popup_window = Popup( content=show, size_hint=(0.3, 0.2), auto_dismiss = True)#(title=txt, content=show, size_hint=(0.3, 0.2), auto_dismiss = True, title_size=self.font_size_ui*0.6, title_align = "center")
+        the_popup.open()
     
 
 class SettingScreen(Screen):
@@ -466,57 +491,6 @@ class SettingScreen(Screen):
             self.timer.cancel()
             self.toggle_rec_dot(False)
 
-
-# class TestingScreen(Screen):
-#     # TODO: Dodaj vizualizacijo zvočnega posnetka - razvidno mora biti ali je glas dovolj jasen in glasen
-#     rec_time = 3
-#     recorder = Recorder()
-#     rec = None
-#     timer = None
-
-#     # Function that records user audio for n seconds and than replays the recording
-#     def timer_callback(self):
-#         self.rec.stop_recording()
-#         self.rec.close()
-#         self.toggle_rec_dot(False)
-
-#         self.rec = self.recorder.open("temp/test.wav", mode="rb")
-#         self.rec.playback_file()
-#         self.timer = threading.Timer(self.rec_time, self.timer_callback_close)
-#         self.timer.start()
-    
-#     def timer_callback_close(self):
-#         self.rec.close()
-#         self.timer = None
-
-#     def test_audio(self):
-#         if self.rec is not None:
-#             self.rec.close()
-        
-#         if self.timer is not None:
-#             self.timer.cancel()
-#             self.rec.close()
-
-#         self.rec = self.recorder.open("temp/test.wav")
-#         self.rec.start_recording()
-#         self.toggle_rec_dot(True)
-#         self.timer = threading.Timer(self.rec_time, self.timer_callback)
-#         self.timer.start()
-
-#     def toggle_rec_dot(self, value):
-#         if value:
-#             self.ids["rec_circle_img"].size_hint = (0.05, 0.05)
-#             print("Light ON")
-#         else:
-#             self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
-#             print("Light OFF")
-
-#     def return_button_clicked(self):
-#         if self.rec is not None:
-#             self.rec.stop_recording()
-#             self.rec.close()
-#             self.timer.cancel()
-#             self.toggle_rec_dot(False)
 
 class AboutScreen(Screen):
     pass
