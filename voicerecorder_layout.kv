@@ -19,16 +19,6 @@
     font_size: 20
     size_hint: (0.2, 0.11)
 
-# <MyPopup@Popup>
-#     auto_dismiss: True
-#     title: "Opozorilo"
-#     size_hint: 0.3, 0.2
-#     pos_hint: {"center_x": 0.5, "center_y":0.5}
-#     Button:
-#         text: "Zapri"
-#         font_size: 32
-#         on_release: root.dismiss()
-
 
 <StartLayout>
     FloatLayout:
@@ -167,7 +157,7 @@
             color:(0,0,0,1)
             size_hint:(0.06, 0.06)
             pos_hint: {'center_x': 0.35, 'center_y': (0.7- 4*textInputHeight - 4*yTextInputMargin) + textInputHeight/2}
-            on_active: root.sex_clicked(self, self.active)
+            on_active: root.sex_clicked(self, self.active, "m")
         Label:
             text: "Ž"
             font_size: root.font_size_ui*(root.width + root.height)/1400
@@ -179,7 +169,7 @@
             color:(0,0,0,1)
             size_hint:(0.06, 0.06)
             pos_hint: {'center_x': 0.5, 'center_y': (0.7- 4*textInputHeight - 4*yTextInputMargin) + textInputHeight/2}
-            # on_active: root.sex_clicked(self, self.active)
+            on_active: root.sex_clicked(self, self.active, "z")
 
         MyButton:   
             text: "Začni"

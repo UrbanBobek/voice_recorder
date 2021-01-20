@@ -211,8 +211,6 @@ class StartLayout(Screen):
         settings = read_settings_file()
         self.font_size_ui = int(settings[2])
     
-    def on_resize(self):
-        print("resizin")
 
 
 class RecordScreen(Screen):
@@ -231,13 +229,8 @@ class RecordScreen(Screen):
     recorder = Recorder()
     rec = None
 
-     # Store text lines to read
-    txt = return_text_from_xlsx("text/test.xlsx") 
+
     settings = read_settings_file()
-    # f = open("text/text.txt")
-    # for i, line in enumerate(f):
-    #     txt.append(line[0:-1])
-    # f.close()
     
 
     def __init__(self, **kwargs):
@@ -245,6 +238,7 @@ class RecordScreen(Screen):
         Window.bind(on_key_down=self._on_keyboard_down)
         Window.bind(on_key_up=self._on_keyboard_up)
         self.rec_file_name = "initial_file_name"
+        self.txt = []
         self.text_id = 0
         self.last_rec_id = 0
         self.enable_keyboard_flag = False
@@ -260,6 +254,10 @@ class RecordScreen(Screen):
         self.curr_user, self.code = return_user_data()
         f = open("user_data/{}".format(self.curr_user))
         file_data = f.readlines()
+
+        # Store text lines to read
+        self.txt = return_text_from_xlsx("text/{}.xlsx".format(self.code)) 
+        
 
         if len(file_data) > 5:
             self.text_to_read = self.txt[len(file_data)-6]
@@ -474,7 +472,6 @@ class PauseScreen(Screen):
             self.progress = float(text_id+1)/len(self.txt)*100
 
 class UserDataScreen(Screen):
-    # TODO: dodaj handlanje neizpoljenih obrazcev (popups) in shranjevanje v datoteke z drugačnimi imeni
     male = ObjectProperty(False)
     female = ObjectProperty(False)
     font_size_ui = ObjectProperty(32)
@@ -489,30 +486,32 @@ class UserDataScreen(Screen):
         settings = read_settings_file()
         self.font_size_ui = int(settings[2])
 
-    def sex_clicked(self, instance, value):
+    def sex_clicked(self, instance, value, sex):
         if value is True:
-            self.male = True
-            self.female = False
+            if sex == "m":
+                self.male = True
+                self.female = False
+            elif sex == "z":
+                self.male = False
+                self.female = True
         else:
             self.male = False
             self.female = True
-        print("Male: {}   Female {} ".format(self.male, self.female ))
         
-
     def spinner_clicked(self, text):
-        print(text)
+        pass
     
     def save_user_data(self, name, surname, code, region):
+        # Remove empty spaces
         name.replace(" ", "")
         surname.replace(" ", "")
         code.replace(" ", "")
-        # print("Male: {}   Female {} ".format(self.male, self.female ))
-        # print("Name: {}   Surname: {}    Code: {}   Region: {}".format(name, surname, code, region))
+
         user_data_filename = "{}{}{}.txt".format(name, surname, code)
 
         if self.male is True:
             sex = "m"
-        else:
+        elif self.female is True:
             sex = "z"
         
         # Check if all the data was submited by user - if not, show a popup screen
@@ -532,7 +531,14 @@ class UserDataScreen(Screen):
         if not name:
             popup_text = "Manjka ime"
             all_data_submited = False 
-        all_data_submited = True
+        # Check if the code is valid:
+        if not path.exists("text/{}.xlsx".format(code)):
+            popup_text = "Koda ni veljavna"
+            all_data_submited = False 
+
+
+        # all_data_submited = True # Remove this for the code to work
+
         if all_data_submited:
             data = 'Ime: {}\nPriimek: {}\nSpol: {}\nRegija: {}\nKoda: {}\n'.format(name, surname, sex, region, code)
             f = open("user_data/{}".format(user_data_filename), "w")
@@ -588,8 +594,6 @@ class EndScreen(Screen):
 # Screen manager for managing changin screens
 screen_manager = ScreenManager()
 
-
-
 screen_manager.add_widget(StartLayout(name="start_screen"))
 screen_manager.add_widget(SettingScreen(name="settings_screen"))
 screen_manager.add_widget(RecordScreen(name="record_screen"))
@@ -601,12 +605,8 @@ screen_manager.add_widget(EndScreen(name="end_screen"))
 
 
 class VoiceRecorderApp(App):   
-    def build(self):
-        def return_new_font_size(Window, width, height):
-            print("resizin... width: {},   height: {},    font size: {}".format(width, height,32*height/width))
-            # StartLayout().font_size_ui = 32*height/width
+    def build(self):  
         Window.clearcolor = (1,1,1,1)
-        Window.bind(on_resize= return_new_font_size)
         return screen_manager
 
 if __name__ == '__main__':
