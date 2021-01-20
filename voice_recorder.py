@@ -25,10 +25,182 @@ Builder.load_file('voicerecorder_layout.kv')
 
 # Set app size
 # Window.size = (500, 700)
+class SettingScreen(Screen):
+    in_dev = ObjectProperty([""])
+    out_dev = ObjectProperty([""])
+    font_sizes = ObjectProperty([""])
+    font_size_ui = ObjectProperty(72)
+
+    def_in_dev = StringProperty()
+    def_out_dev = StringProperty()
+    def_font_size = StringProperty()
+
+    output_devices = []
+    input_devices = []
+    pSetting = PyAduioSettings()
+
+    rec_time = 3
+    recorder = Recorder()
+    settings = read_settings_file()
+    rec = recorder.open("temp/test.wav", channels=1, rate=44100, input_dev=int(settings[1]))
+    timer = None
+
+    def __init__(self, **kwargs):
+        super(SettingScreen, self).__init__(**kwargs)
+        
+        self.output_devices = self.pSetting.return_output_devices()
+        self.input_devices = self.pSetting.return_input_devices()
+
+        # If settings file does not exist, create it and set input/output device to default
+        if not os.path.isfile('temp/settings.txt'):
+            def_in = self.pSetting.find_default_device(self.input_devices, 1)
+            def_out = self.pSetting.find_default_device(self.output_devices, 1)
+            
+            f = open("temp/settings.txt", "w")
+            f.write("out_dev: {}\nin_dev: {}\nfont_size: {}\nnum_of_channels: {}\nsamp_rate: {}".format(def_in, def_out, 32, 1, 44100))
+            f.close()
+
+            def_settings = read_settings_file()
+            
+            self.def_out_dev = self.pSetting.find_device_by_number(self.output_devices, def_settings[0])
+            self.def_in_dev = self.pSetting.find_device_by_number(self.input_devices, def_settings[1])
+            self.def_font_size = def_settings[2]
+
+        # If a settings file exists, set the settings value to the values in file
+        else:
+            def_settings = read_settings_file()
+
+            self.def_out_dev = self.pSetting.find_device_by_number(self.output_devices, def_settings[0])
+            self.def_in_dev = self.pSetting.find_device_by_number(self.input_devices, def_settings[1])
+            self.def_font_size = def_settings[2]
+
+        # Create list of input and output devices
+        self.in_dev = [i[0] for i in self.input_devices]
+        self.out_dev = [i[0] for i in self.output_devices]
+        
+        # Create list of font sizes, input channels and sampling rates
+        self.font_sizes = ["8", "9", "10", "11", "12", "14", "18", "24", "30", "36", "48", "60"]
+        num_of_channels = 1
+        samp_rate = 44100
+    
+    def on_enter(self):
+        self.pSetting = PyAduioSettings()
+        self.recorder = Recorder()
+        self.settings = read_settings_file()
+        self.rec = self.recorder.open("temp/test.wav", channels=1, rate=44100, input_dev=int(self.settings[1]))
+
+    def spinner_clicked(self, setting, value):
+        self.edit_settings_file(setting, value)
+    
+    def edit_settings_file(self, setting, value):
+        f = open("temp/settings.txt", "r")
+        lines = f.readlines()
+        if setting == "output_dev":
+            line = lines[0]
+            idx = line.find(":")
+            line = line[:idx+2] 
+
+            txt = self.pSetting.find_number_by_device( self.output_devices, str(value) )
+            if txt >= 0:
+                line += str(txt)
+            else:
+                line += self.pSetting.find_default_device(self.output_devices,1)
+            line += "\n"
+            lines[0] = line
+
+        elif setting == "input_dev":
+            line = lines[1]
+            idx = line.find(":")
+            line = line[:idx+2]
+            
+            txt = self.pSetting.find_number_by_device( self.input_devices, str(value) )
+            if txt >= 0:
+                line += str(txt)
+            else:
+                line += self.pSetting.find_default_device(self.input_devices, 1)
+
+            line += "\n"
+            lines[1] = line
+
+        elif setting == "font_size":
+            line = lines[2]
+            idx = line.find(":")
+            line = line[:idx+2]
+            line += str(value)
+            line += "\n"
+            lines[2] = line
+
+            # Change the font size
+            print(value)
+            self.font_size_ui = int(value)
+
+        f.close()
+        f = open("temp/settings.txt", "w") 
+        for line in lines:
+            f.write(line)
+            # print(line)
+        f.close()
+
+    # Function that records user audio for n seconds and than replays the recording
+    def timer_callback(self):
+        self.rec.stop_recording()
+        print("STOP recording")
+        self.rec.close()
+        print("CLOSED - callback 1")
+        self.toggle_rec_dot(False)
+        
+
+        self.rec = self.recorder.open("temp/test.wav", mode="rb")
+        self.rec.playback_file()
+        self.timer = threading.Timer(self.rec_time, self.timer_callback_close)
+        self.timer.start()
+    
+    def timer_callback_close(self):
+        self.rec.close()
+        print("CLOSED - Callback 2")
+        self.timer = None
+
+    def test_audio(self):
+        if self.rec._stream is not None:
+            print("CLOSING!")
+            self.rec.close()
+        
+        if self.timer is not None:
+            self.timer.cancel()
+            self.rec.close()
+        
+        settings = read_settings_file()
+        print()
+        print("clicked")
+        self.rec = self.recorder.open("temp/test.wav", channels=1, rate=44100, input_dev=int(self.settings[1]) )
+        print("OPENED")
+        self.rec.start_recording()
+        print("start recording")
+        self.toggle_rec_dot(True)
+        self.timer = threading.Timer(self.rec_time, self.timer_callback)
+        self.timer.start()
+
+    def toggle_rec_dot(self, value):
+        if value:
+            self.ids["rec_circle_img"].size_hint = (0.05, 0.05)
+            # print("Light ON")
+        else:
+            self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
+            # print("Light OFF")
+
+    def return_button_clicked(self):
+        if self.rec is not None:
+            self.rec.stop_recording()
+            self.rec.close()
+            self.timer.cancel()
+            self.toggle_rec_dot(False)
+
+
 
 class StartLayout(Screen):
     font_size_ui = ObjectProperty(32)
 
+    print(Window.size)
     def __init__(self, **kwargs):
         super(StartLayout, self).__init__(**kwargs)
 
@@ -38,20 +210,30 @@ class StartLayout(Screen):
     def on_enter(self, *args):
         settings = read_settings_file()
         self.font_size_ui = int(settings[2])
+    
+    def on_resize(self):
+        print("resizin")
 
 
 class RecordScreen(Screen):
+    # TODO: spremeni, da je ime datoteke s tekstom koda govorca 
     next_rec = ObjectProperty(None)
     text_to_read = StringProperty()
     prog_indic = StringProperty()
     font_size_ui = ObjectProperty(32)
+    redo_text = StringProperty()
+    next_text = StringProperty()
+    playback_text = StringProperty()
+    back_text = StringProperty()
+    foward_text = StringProperty()
 
     # Create Recorder object
     recorder = Recorder()
     rec = None
 
      # Store text lines to read
-    txt = return_text_from_xlsx("text/Artur-B-G0042.xlsx")
+    txt = return_text_from_xlsx("text/test.xlsx") 
+    settings = read_settings_file()
     # f = open("text/text.txt")
     # for i, line in enumerate(f):
     #     txt.append(line[0:-1])
@@ -66,6 +248,8 @@ class RecordScreen(Screen):
         self.text_id = 0
         self.last_rec_id = 0
         self.enable_keyboard_flag = False
+        self.pause_ended = False
+        self.show_tutorial = True
 
         settings = read_settings_file()
         self.font_size_ui = int(settings[2])
@@ -73,25 +257,43 @@ class RecordScreen(Screen):
     def on_enter(self, *args):
         self.enable_keyboard(True)
 
-        self.curr_user, self.code = self.return_user_data()
+        self.curr_user, self.code = return_user_data()
         f = open("user_data/{}".format(self.curr_user))
         file_data = f.readlines()
+
         if len(file_data) > 5:
-            self.text_to_read = self.txt[len(file_data)-5]
-            self.text_id = len(file_data)-5
-            self.last_rec_id = len(file_data)-5
+            self.text_to_read = self.txt[len(file_data)-6]
+            self.text_id = len(file_data)-6
+            self.last_rec_id = len(file_data)-6
+
+            self.next_text = ""
+            self.redo_text = ""
+            self.playback_text = ""
+            self.back_text = ""
+            self.foward_text = ""
+            self.show_tutorial = False
+            
         else:
-            self.text_to_read = "Pritisnite gumb 'Naslednji' (enter/space) in pričnite brati tekst na ekranu"
+            self.text_to_read = "[i]Pritisnite gumb 'Naslednji' in pričnite brati tekst na ekranu [/i]"
             self.text_id = 0
             self.last_rec_id = 0
 
-        self.prog_indic = "0/{}".format(len(self.txt))
+            # tutorial text
+            self.next_text = "naslednji tekst\n([i]space/enter[/i])"
+            self.redo_text = "ponovi snemanje\n([i]lctrl[/i])"
+            self.playback_text = u"poslušaj posnetek\n([i]gor[/i])"
+            self.back_text = "1 tekst nazaj\n([i]levo[/i])"
+            self.foward_text = "1 tekst naprej\n([i]desno[/i])"
+            self.show_tutorial = True
+
+        # self.prog_indic = "0/{}".format(len(self.txt))
+        self.prog_indic = "0/{}".format(10)
         self.key_up = True
 
-        settings = read_settings_file()
-        self.font_size_ui = int(settings[2])
+        self.settings = read_settings_file()
+        self.font_size_ui = int(self.settings[2])
 
-        print(read_settings_file())
+        self.pause_ended = True
 
     def on_leave(self, *args):
         self.enable_keyboard(False)
@@ -115,57 +317,64 @@ class RecordScreen(Screen):
     def _on_keyboard_up(self, instance, keyboard, keycode):
         self.key_up = True
 
-    # Read user code from file
-    def return_user_data(self):
-        with open("temp/curr_user_data.txt") as f:
-            t = f.read()
-            t = t.split()
-            if len(t) > 1:
-                curr_user = t[0]
-                code = t[-1]
-            else:
-                curr_user = "noUser"
-                code = "NoCode"
-            f.close()
-        return curr_user, code
 
     def next_recording(self):
-        if self.text_id > len(self.txt):
-            print("konec!")
-            self.fp.close()
+        # Check if there is any more text to read - if not, display the end screen
+        if self.text_id >= len(self.txt):
+            screen_manager.current = "end_screen"
+            return 1
+        
+        if self.show_tutorial:
+            self.next_text = ""
+            self.redo_text = ""
+            self.playback_text = ""
+            self.back_text = ""
+            self.foward_text = ""
+            self.show_tutorial = False
 
         if self.rec is not None:
             self.rec.stop_recording()
             self.rec.close()
             self.rec = None
             self.toggle_rec_dot(False)
+        
+        if (self.text_id)%10 or self.pause_ended:
+            if (self.text_id)%10:
+                self.pause_ended = False
 
-        self.curr_user, self.code = self.return_user_data()
-        self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
+            self.curr_user, self.code = return_user_data()
+            self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
 
-        # Check if recording already exists
-        file_name = "recordings/{}".format(self.rec_file_name)
-        if not path.exists(file_name):
-            self.last_rec_id +=1
+            # Check if recording already exists
+            file_name = "recordings/{}".format(self.rec_file_name)
+            if not path.exists(file_name):
+                self.last_rec_id +=1
+                with open("user_data/{}".format(self.curr_user), "a+") as fp:
+                    fp.write("['{}', '{}']\n".format(self.rec_file_name, self.txt[self.text_id]))
 
-        self.rec = self.recorder.open(file_name)
-        self.rec.start_recording()
-        self.toggle_rec_dot(True)
+            self.rec = self.recorder.open(file_name, channels=1, rate=44100, input_dev=int(self.settings[1]))
+            self.rec.start_recording()
+            self.toggle_rec_dot(True)
 
-        with open("user_data/{}".format(self.curr_user), "a+") as fp:
-            fp.write("['{}', '{}']\n".format(self.rec_file_name, self.txt[self.text_id]))
-        # print(self.txt[self.text_id])
-        self.change_text( str(self.txt[self.text_id]) )
-        self.text_id += 1
+            # print(self.txt[self.text_id])
+            self.change_text( str(self.txt[self.text_id]) )
+            self.text_id += 1
+        else:
+            screen_manager.transition.direction = 'left'
+            screen_manager.current = "pause_screen"
+            
   
     
     def change_text(self, text):
+        
         self.text_to_read = text
-        self.prog_indic = "{}/{}".format(self.text_id+1,len(self.txt))
+        # self.prog_indic = "{}/{}".format(self.text_id+1,len(self.txt))
+        self.prog_indic = "{}/{}".format((self.text_id)%10+1,10)
 
         # disable "1 foward" button in case no new records are ahead
         if self.text_id + 1 >= self.last_rec_id:
             self.ids["1_foward"].disabled = True
+
         else:
             self.ids["1_foward"].disabled = False
 
@@ -179,7 +388,7 @@ class RecordScreen(Screen):
             self.toggle_rec_dot(False)
         file_name = "recordings/{}".format(self.rec_file_name)
         if path.exists(file_name):
-            self.rec = self.recorder.open(file_name, mode="rb")
+            self.rec = self.recorder.open(file_name, mode="rb", channels=1, rate=44100, input_dev=int(self.settings[1]))
             self.rec.playback_file()
         else:
             pass
@@ -194,7 +403,7 @@ class RecordScreen(Screen):
             
         # curr_user, code = self.return_user_data()
         self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id - 1).zfill(5))
-        self.rec = self.recorder.open(str("recordings/"+self.rec_file_name))
+        self.rec = self.recorder.open(str("recordings/"+self.rec_file_name), channels=1, rate=44100, input_dev=int(self.settings[1]))
         self.rec.start_recording()
         self.toggle_rec_dot(True)
 
@@ -224,7 +433,6 @@ class RecordScreen(Screen):
 
         self.change_text( str(self.txt[self.text_id]) )
         self.rec_file_name = "{}_{}.wav".format(self.code, str(self.text_id).zfill(5))
-        # self.next_recording()
     
     def enable_keyboard(self, value):
         self.enable_keyboard_flag = value
@@ -232,10 +440,10 @@ class RecordScreen(Screen):
     def toggle_rec_dot(self, value):
         if value:
             self.ids["rec_circle_img"].size_hint = (0.05, 0.05)
-            print("Light ON")
+            # print("Light ON")
         else:
             self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
-            print("Light OFF")
+            # print("Light OFF")
             file_name = "recordings/{}".format(self.rec_file_name)
             file_name_trimmed = "recordings/trimmed/{}".format(self.rec_file_name)
             audio_trimmed = trim_and_silence_audio_file(file_name)
@@ -248,6 +456,23 @@ class RecordScreen(Screen):
             self.rec = None
             self.toggle_rec_dot(False)
     
+class PauseScreen(Screen):
+    font_size_ui = ObjectProperty(32)
+    progress = ObjectProperty(0)
+
+    txt = return_text_from_xlsx("text/Artur-B-G0042.xlsx") 
+
+    def on_enter(self):
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
+
+        curr_user, code = return_user_data()
+        f = open("user_data/{}".format(curr_user))
+        file_data = f.readlines()
+        if len(file_data) > 5:
+            text_id = len(file_data)-5
+            self.progress = float(text_id+1)/len(self.txt)*100
+
 class UserDataScreen(Screen):
     # TODO: dodaj handlanje neizpoljenih obrazcev (popups) in shranjevanje v datoteke z drugačnimi imeni
     male = ObjectProperty(False)
@@ -281,8 +506,8 @@ class UserDataScreen(Screen):
         name.replace(" ", "")
         surname.replace(" ", "")
         code.replace(" ", "")
-        print("Male: {}   Female {} ".format(self.male, self.female ))
-        print("Name: {}   Surname: {}    Code: {}   Region: {}".format(name, surname, code, region))
+        # print("Male: {}   Female {} ".format(self.male, self.female ))
+        # print("Name: {}   Surname: {}    Code: {}   Region: {}".format(name, surname, code, region))
         user_data_filename = "{}{}{}.txt".format(name, surname, code)
 
         if self.male is True:
@@ -290,6 +515,7 @@ class UserDataScreen(Screen):
         else:
             sex = "z"
         
+        # Check if all the data was submited by user - if not, show a popup screen
         all_data_submited = True
         if not self.male and not self.female:
             popup_text = "Manjka spol" 
@@ -306,7 +532,7 @@ class UserDataScreen(Screen):
         if not name:
             popup_text = "Manjka ime"
             all_data_submited = False 
-         
+        all_data_submited = True
         if all_data_submited:
             data = 'Ime: {}\nPriimek: {}\nSpol: {}\nRegija: {}\nKoda: {}\n'.format(name, surname, sex, region, code)
             f = open("user_data/{}".format(user_data_filename), "w")
@@ -334,183 +560,53 @@ class UserDataScreen(Screen):
     def show_popup(self, txt):
         the_popup = self.Pop_up()
         the_popup.title = txt
-        #popup_window = Popup( content=show, size_hint=(0.3, 0.2), auto_dismiss = True)#(title=txt, content=show, size_hint=(0.3, 0.2), auto_dismiss = True, title_size=self.font_size_ui*0.6, title_align = "center")
         the_popup.open()
     
 
-class SettingScreen(Screen):
-    in_dev = ObjectProperty([""])
-    out_dev = ObjectProperty([""])
-    font_sizes = ObjectProperty([""])
-    font_size_ui = ObjectProperty(72)
-
-    def_in_dev = StringProperty()
-    def_out_dev = StringProperty()
-    def_font_size = StringProperty()
-
-    output_devices = []
-    input_devices = []
-    pSetting = PyAduioSettings()
-
-    rec_time = 3
-    recorder = Recorder()
-    rec = None
-    timer = None
-
-    def __init__(self, **kwargs):
-        super(SettingScreen, self).__init__(**kwargs)
-        
-        self.output_devices = self.pSetting.return_output_devices()
-        self.input_devices = self.pSetting.return_input_devices()
-
-        # If settings file does not exist, create it and set input/output device to default
-        if not os.path.isfile('temp/settings.txt'):
-            def_in = self.pSetting.find_default_device(self.input_devices)
-            def_out = self.pSetting.find_default_device(self.output_devices)
-            
-            f = open("temp/settings.txt", "w")
-            f.write("out_dev: {}\nin_dev: {}\nfont_size: {}\nnum_of_channels: {}\nsamp_rate: {}".format(def_in, def_out, 32, 1, 44100))
-            f.close()
-
-            def_settings = read_settings_file()
-            
-            self.def_out_dev = self.pSetting.find_device_by_number(self.output_devices, def_settings[0])
-            self.def_in_dev = self.pSetting.find_device_by_number(self.input_devices, def_settings[1])
-            self.def_font_size = def_settings[2]
-
-        # If a settings file exists, set the settings value to the values in file
-        else:
-            def_settings = read_settings_file()
-
-            self.def_out_dev = self.pSetting.find_device_by_number(self.output_devices, def_settings[0])
-            self.def_in_dev = self.pSetting.find_device_by_number(self.input_devices, def_settings[1])
-            self.def_font_size = def_settings[2]
-
-        # Create list of input and output devices
-        self.in_dev = [i[0] for i in self.input_devices]
-        self.out_dev = [i[0] for i in self.output_devices]
-        
-        # Create list of font sizes, input channels and sampling rates
-        self.font_sizes = ["8", "9", "10", "11", "12", "14", "18", "24", "30", "36", "48", "60", "72", "96"]
-        num_of_channels = 1
-        samp_rate = 44100
-        
-    def spinner_clicked(self, setting, value):
-        self.edit_settings_file(setting, value)
-    
-    def edit_settings_file(self, setting, value):
-        f = open("temp/settings.txt", "r")
-        lines = f.readlines()
-        if setting == "output_dev":
-            line = lines[0]
-            idx = line.find(":")
-            line = line[:idx+2] 
-
-            txt = self.pSetting.find_number_by_device( self.output_devices, str(value) )
-            if txt >= 0:
-                line += str(txt)
-            else:
-                line += self.pSetting.find_default_device(self.output_devices)
-            line += "\n"
-            lines[0] = line
-
-        elif setting == "input_dev":
-            line = lines[1]
-            idx = line.find(":")
-            line = line[:idx+2]
-            
-            txt = self.pSetting.find_number_by_device( self.input_devices, str(value) )
-            if txt >= 0:
-                line += str(txt)
-            else:
-                line += self.pSetting.find_default_device(self.input_devices)
-
-            line += "\n"
-            lines[1] = line
-
-        elif setting == "font_size":
-            line = lines[2]
-            idx = line.find(":")
-            line = line[:idx+2]
-            line += str(value)
-            line += "\n"
-            lines[2] = line
-
-            # Change the font size
-            print(value)
-            self.font_size_ui = int(value)
-
-        f.close()
-        f = open("temp/settings.txt", "w") 
-        for line in lines:
-            f.write(line)
-            # print(line)
-        f.close()
-
-    # Function that records user audio for n seconds and than replays the recording
-    def timer_callback(self):
-        self.rec.stop_recording()
-        self.rec.close()
-        self.toggle_rec_dot(False)
-
-        self.rec = self.recorder.open("temp/test.wav", mode="rb")
-        self.rec.playback_file()
-        self.timer = threading.Timer(self.rec_time, self.timer_callback_close)
-        self.timer.start()
-    
-    def timer_callback_close(self):
-        self.rec.close()
-        self.timer = None
-
-    def test_audio(self):
-        if self.rec is not None:
-            self.rec.close()
-        
-        if self.timer is not None:
-            self.timer.cancel()
-            self.rec.close()
-
-        self.rec = self.recorder.open("temp/test.wav")
-        self.rec.start_recording()
-        self.toggle_rec_dot(True)
-        self.timer = threading.Timer(self.rec_time, self.timer_callback)
-        self.timer.start()
-
-    def toggle_rec_dot(self, value):
-        if value:
-            self.ids["rec_circle_img"].size_hint = (0.05, 0.05)
-            print("Light ON")
-        else:
-            self.ids["rec_circle_img"].size_hint = (0.05, 0.0)
-            print("Light OFF")
-
-    def return_button_clicked(self):
-        if self.rec is not None:
-            self.rec.stop_recording()
-            self.rec.close()
-            self.timer.cancel()
-            self.toggle_rec_dot(False)
-
 
 class AboutScreen(Screen):
+    font_size_ui = ObjectProperty(32)
+
+    def __init__(self, **kwargs):
+        super(AboutScreen, self).__init__(**kwargs)
+
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
+
+    pass
+class EndScreen(Screen):
+    font_size_ui = ObjectProperty(32)
+
+    def __init__(self, **kwargs):
+        super(EndScreen, self).__init__(**kwargs)
+
+        settings = read_settings_file()
+        self.font_size_ui = int(settings[2])
+
     pass
 
 # Screen manager for managing changin screens
 screen_manager = ScreenManager()
 
+
+
 screen_manager.add_widget(StartLayout(name="start_screen"))
-screen_manager.add_widget(RecordScreen(name="record_screen"))
 screen_manager.add_widget(SettingScreen(name="settings_screen"))
-# screen_manager.add_widget(TestingScreen(name="testing_screen"))
+screen_manager.add_widget(RecordScreen(name="record_screen"))
+screen_manager.add_widget(PauseScreen(name="pause_screen"))
 screen_manager.add_widget(AboutScreen(name="about_screen"))
 screen_manager.add_widget(UserDataScreen(name="user_data_screen"))
+screen_manager.add_widget(EndScreen(name="end_screen"))
 
 
 
 class VoiceRecorderApp(App):   
-    font_size = 32
     def build(self):
+        def return_new_font_size(Window, width, height):
+            print("resizin... width: {},   height: {},    font size: {}".format(width, height,32*height/width))
+            # StartLayout().font_size_ui = 32*height/width
         Window.clearcolor = (1,1,1,1)
+        Window.bind(on_resize= return_new_font_size)
         return screen_manager
 
 if __name__ == '__main__':

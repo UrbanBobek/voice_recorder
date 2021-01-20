@@ -62,12 +62,33 @@ def return_text_from_xlsx(file_name):
 
     # last column contains sentences
     lines = dfs[cols[-1]]
-    txt = [line for line in lines]
+    
+    # Some lines of text contain a newline operator - remove those
+    txt = []
+    for line in lines:
+        line = line.splitlines()
+        st = ""
+        for l in line:
+            st = st + l + " "
+        txt.append(st)
 
     return txt
 
+# Read user code from file
+def return_user_data():
+    with open("temp/curr_user_data.txt") as f:
+        t = f.read()
+        t = t.split()
+        if len(t) > 1:
+            curr_user = t[0]
+            code = t[-1]
+        else:
+            curr_user = "noUser"
+            code = "NoCode"
+        f.close()
+    return curr_user, code
 
 # txt = return_text_from_xlsx("text/Artur-B-G0042.xlsx")
-# print(txt)
+# print(txt[20])
 
 
