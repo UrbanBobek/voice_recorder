@@ -1,0 +1,5 @@
+out_dev: 3
+in_dev: 3
+font_size: 36
+num_of_channels: 1
+samp_rate: 44100

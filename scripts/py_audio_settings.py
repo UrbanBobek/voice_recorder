@@ -11,7 +11,6 @@ class PyAduioSettings():
 		output_dev = []
 		for i in range (0,self.numdevices):
 			if self.p.get_device_info_by_host_api_device_index(0,i).get('maxOutputChannels')>0:
-				# print( "Output Device id " + str(i) +  " - " + self.p.get_device_info_by_host_api_device_index(0,i).get('name'))
 				out_dev.append([self.p.get_device_info_by_host_api_device_index(0,i).get("name"), i])
 
 		for dev in out_dev:
@@ -21,7 +20,6 @@ class PyAduioSettings():
 							input_device=devinfo['index'],
 							input_channels=1,
 							input_format=pyaudio.paInt16):
-					print('Yay!')
 					output_dev.append(dev)
 			except:
 				pass
@@ -35,10 +33,8 @@ class PyAduioSettings():
 		input_dev = []
 		for i in range (0,self.numdevices):
 			if self.p.get_device_info_by_host_api_device_index(0,i).get('maxInputChannels')>0:
-				# print( "Input Device id " + str(i) +  " - " + self.p.get_device_info_by_host_api_device_index(0,i).get('name'))
 				in_dev.append([self.p.get_device_info_by_host_api_device_index(0,i).get("name"), i])
 
-		print(in_dev)
 		for dev in in_dev:
 			devinfo = self.p.get_device_info_by_index(dev[1])
 			try:
@@ -46,7 +42,6 @@ class PyAduioSettings():
 							input_device=devinfo['index'],
 							input_channels=1,
 							input_format=pyaudio.paInt16):
-					print('Yay!')
 					input_dev.append(dev)
 			except:
 				pass

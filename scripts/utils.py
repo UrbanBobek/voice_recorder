@@ -5,7 +5,7 @@ import pandas as pd
 
 # Returns current settings in seting file
 def read_settings_file():
-    f = open("temp/settings.txt", "r")
+    f = open("../temp/settings.txt", "r")
     lines = f.readlines()
     res = []
     for line in lines:
@@ -76,7 +76,7 @@ def return_text_from_xlsx(file_name):
 
 # Read user code from file
 def return_user_data():
-    with open("temp/curr_user_data.txt") as f:
+    with open("../temp/curr_user_data.txt") as f:
         t = f.read()
         t = t.split()
         if len(t) > 1:

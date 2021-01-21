@@ -1,7 +1,8 @@
-posnetki
-calculator
-test.wav
-recordings
-temp
-user_data
+!/recordings
+/recordings/*
+!/recordings/temp
+/recordings/temp/*
+temp/curr_user_data.txt
+!/user_data
+/user_data/*
 silenceremover.py

@@ -58,7 +58,7 @@
                 root.manager.current = 'record_screen'
         Image:
             id: mic_img
-            source: 'images/mic.png'
+            source: '../images/mic.png'
             size_hint: (0.2, 0.2)
             pos_hint: {'center_x': 0.5, 'center_y':0.6}
             keep_ratio: True
@@ -245,14 +245,14 @@
 
         Image:
             id: rec_circle_img
-            source: 'images/red-circle.png'
+            source: '../images/red-circle.png'
             size_hint: (0.0, 0.0)
             pos_hint: {'center_x': 0.5, 'center_y':0.26}
             keep_ratio: True
         MyButton:
             text: ""#"Ponovi"
 
-            background_normal: 'images/redo_7.png'
+            background_normal: '../images/redo_7.png'
             font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.25, 'center_y':  0.15 }
@@ -273,7 +273,7 @@
         MyButton:
             text: "" #"Playback"
 
-            background_normal: 'images/play_5.png'
+            background_normal: '../images/play_5.png'
             font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.75, 'center_y': 0.15}
@@ -295,7 +295,7 @@
         MyButton:
             text: "" #"1 nazaj"
 
-            background_normal: 'images/left.png'
+            background_normal: '../images/left.png'
             font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.1, 'center_y': 0.15}
@@ -318,7 +318,7 @@
             text: ""#"1 naprej"
             id: 1_foward
 
-            background_normal: 'images/right.png'
+            background_normal: '../images/right.png'
             font_size: root.font_size_ui
             bold: True
             pos_hint: {'center_x': 0.9, 'center_y': 0.15}
@@ -472,7 +472,7 @@
 
         Image:
             id: rec_circle_img
-            source: 'images/red-circle.png'
+            source: '../images/red-circle.png'
             size_hint: (0.0, 0.0)
             pos_hint: {'center_x': 0.5, 'center_y':0.35}
             keep_ratio: True
