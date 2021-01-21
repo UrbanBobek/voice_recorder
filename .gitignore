@@ -1,8 +1,5 @@
-!/recordings
-/recordings/*
-!/recordings/temp
-/recordings/temp/*
+recordings/*.wav
+recordings/trimmed/*.wav
 temp/curr_user_data.txt
-!/user_data
-/user_data/*
+/user_data/*.txt
 silenceremover.py

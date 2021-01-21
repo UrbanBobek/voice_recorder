@@ -364,9 +364,11 @@ class RecordScreen(Screen):
         # disable "1 foward" button in case no new records are ahead
         if self.text_id + 1 >= self.last_rec_id:
             self.ids["1_foward"].disabled = True
-
+            self.ids["checkmark_img"].size_hint = (0.0, 0.05)
         else:
             self.ids["1_foward"].disabled = False
+            self.ids["checkmark_img"].size_hint = (0.06, 0.06)
+
 
 
     # playback the audio file of currrent text

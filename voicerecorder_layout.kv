@@ -3,6 +3,7 @@
 #:set buttonHeight 0.12
 #:set buttonHeight2 0.18
 #:set buttonHeight3 0.16
+#:set buttonWidth 0.42
 #:set xTextInputMargin 0.3
 #:set yTextInputMargin 0.02
 #:set textInputFontSize 32
@@ -25,33 +26,37 @@
         size: root.width, root.height
 
         MyButton:
-            pos_hint: {'center_x': xButtonMargin + 0.2, 'center_y': 0.28 }
+            pos_hint: {'center_x': xButtonMargin + 0.22, 'center_y': 0.28 }
             text: "nastavitve"
             font_size: root.font_size_ui*(root.width + root.height)/1400
-            size_hint: (0.38, 0.16)
+            size_hint: (buttonWidth, 0.16)
             on_press: 
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'settings_screen'
         MyButton:
-            pos_hint: {'center_x': xButtonMargin + 0.2, 'center_y': 0.1 }
+            pos_hint: {'center_x': xButtonMargin + 0.22, 'center_y': 0.1 }
             text: "o programu"
             font_size: root.font_size_ui*(root.width + root.height)/1400
-            size_hint: (0.38, 0.16)
+            size_hint: (buttonWidth, 0.16)
             on_press: 
                 root.manager.transition.direction = 'up'
                 root.manager.current = 'about_screen'
         MyButton:
-            size_hint: (0.5, 0.2)
-            pos_hint: {'x': 1 - xButtonMargin - 0.5, 'center_y': 0.26 }
-            text: "Začetek"
+            # size_hint: (0.5, 0.2)
+            # pos_hint: {'x': 1 - xButtonMargin - 0.5, 'center_y': 0.26 }
+            pos_hint: {'center_x': xButtonMargin + 0.68, 'center_y': 0.28 }
+            size_hint: (buttonWidth, 0.16)
+            text: "začetek"
             font_size: root.font_size_ui*(root.width + root.height)/1400
             on_press: 
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'user_data_screen'
         MyButton:
-            size_hint: (0.5, 0.12)
-            pos_hint: {'x': 1 - xButtonMargin - 0.5, 'center_y': 0.08 }
-            text: "Nadaljuj"
+            # size_hint: (0.5, 0.12)
+            # pos_hint: {'x': 1 - xButtonMargin - 0.5, 'center_y': 0.08 }
+            pos_hint: {'center_x': xButtonMargin + 0.68, 'center_y': 0.1 }
+            size_hint: (buttonWidth, 0.16)
+            text: "nadaljuj"
             font_size: root.font_size_ui*(root.width + root.height)/1400
             on_press: 
                 root.manager.transition.direction = 'left'
@@ -59,8 +64,18 @@
         Image:
             id: mic_img
             source: '../images/mic.png'
-            size_hint: (0.2, 0.2)
-            pos_hint: {'center_x': 0.5, 'center_y':0.6}
+            size_hint: (0.15, 0.15)
+            pos_hint: {'center_x': 0.5, 'center_y':0.5}
+            keep_ratio: True
+        Image:
+            source: '../images/snemanje_govora.png'
+            size_hint: (0.8, 0.5)
+            pos_hint: {'center_x': 0.5, 'center_y':0.8}
+            keep_ratio: True
+        Image:
+            source: '../images/znanost.png'
+            size_hint: (0.4, 0.2)
+            pos_hint: {'center_x': 0.7, 'center_y':0.65}
             keep_ratio: True
         # Label:
         #     text:"VOICE RECORDER :>"
@@ -223,7 +238,7 @@
             
             
         MyButton:
-            text: "Naslednji"
+            text: "naslednji"
             id: next_rec
             font_size: root.font_size_ui*(root.width + root.height)/1600
             bold: True
@@ -248,6 +263,12 @@
             source: '../images/red-circle.png'
             size_hint: (0.0, 0.0)
             pos_hint: {'center_x': 0.5, 'center_y':0.26}
+            keep_ratio: True
+        Image:
+            id: checkmark_img
+            source: '../images/checkmark.png'
+            size_hint: (0.0, 0.0)
+            pos_hint: {'center_x': 0.5, 'center_y':0.28}
             keep_ratio: True
         MyButton:
             text: ""#"Ponovi"
