@@ -23,8 +23,6 @@ from os import path
 Builder.load_file('voicerecorder_layout.kv')
 
 
-# Set app size
-# Window.size = (500, 700)
 class SettingScreen(Screen):
     in_dev = ObjectProperty([""])
     out_dev = ObjectProperty([""])
