@@ -58,9 +58,9 @@
             size_hint: (buttonWidth, 0.16)
             text: "nadaljuj"
             font_size: root.font_size_ui*(root.width + root.height)/1400
-            on_press: 
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'record_screen'
+            on_press: root.can_continue()
+                # root.manager.transition.direction = 'left'
+                # root.manager.current = 'record_screen'
         Image:
             id: mic_img
             source: '../images/mic.png'

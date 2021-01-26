@@ -96,6 +96,7 @@ class RecordingFile(object):
                                         rate=self.rate,
                                         output=True,
                                         frames_per_buffer=self.frames_per_buffer,
+                                        output_device_index=self.output_dev,
                                         stream_callback=self.get_playback_callback())
         self._stream.start_stream()
         return self

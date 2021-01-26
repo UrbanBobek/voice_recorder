@@ -20,7 +20,7 @@ import mute_alsa
 import os.path
 from os import path
 
-Builder.load_file('../voicerecorder_layout.kv')
+Builder.load_file('voicerecorder_layout.kv')
 
 
 # Set app size
@@ -145,8 +145,8 @@ class SettingScreen(Screen):
         self.rec.close()
         self.toggle_rec_dot(False)
         
-
-        self.rec = self.recorder.open("../temp/test.wav", mode="rb")
+        sett = read_settings_file()
+        self.rec = self.recorder.open("../temp/test.wav", mode="rb", output_dev=int(sett[0]))
         self.rec.playback_file()
         self.timer = threading.Timer(self.rec_time, self.timer_callback_close)
         self.timer.start()
@@ -201,6 +201,25 @@ class StartLayout(Screen):
         settings = read_settings_file()
         self.font_size_ui = int(settings[2])
     
+    def can_continue(self):
+        curr_user, code = return_user_data()
+
+        if path.exists("../user_data/{}".format(curr_user)):
+            screen_manager.transition.direction = 'left'
+            screen_manager.current = "record_screen"
+        else:
+            self.show_popup("Datoteke ni na voljo")
+    
+    class Pop_up(Popup):
+        settings = read_settings_file()
+        font_size_ui = int(settings[2])
+        f_size_ui = ObjectProperty(font_size_ui)
+        pass
+
+    def show_popup(self, txt):
+        the_popup = self.Pop_up()
+        the_popup.title = txt
+        the_popup.open()
 
 
 class RecordScreen(Screen):
@@ -245,8 +264,11 @@ class RecordScreen(Screen):
         file_data = f.readlines()
 
         # Store text lines to read
-        # self.txt = return_text_from_xlsx("../text/{}.xlsx".format(self.code)) 
-        self.txt = return_text_from_xlsx("../text/Artur-B-G0042.xlsx") 
+        if not self.code == -1:
+            self.txt = return_text_from_xlsx("../text/{}.xlsx".format(self.code)) 
+        else:
+            self.txt = []
+        # self.txt = return_text_from_xlsx("../text/Artur-B-G0042.xlsx") 
         
         # print(len(file_data))
 
@@ -380,7 +402,8 @@ class RecordScreen(Screen):
             self.toggle_rec_dot(False)
         file_name = "../recordings/{}".format(self.rec_file_name)
         if path.exists(file_name):
-            self.rec = self.recorder.open(file_name, mode="rb", channels=1, rate=44100, input_dev=int(self.settings[1]))
+            settings = read_settings_file()
+            self.rec = self.recorder.open(file_name, mode="rb", channels=1, rate=44100, output_dev=int(self.settings[0]))
             self.rec.playback_file()
         else:
             pass
@@ -452,9 +475,12 @@ class PauseScreen(Screen):
     font_size_ui = ObjectProperty(32)
     progress = ObjectProperty(0)
 
-    # curr_user, code = return_user_data()
-    # self.txt = return_text_from_xlsx("../text/{}.xlsx".format(code)) 
-    txt = return_text_from_xlsx("../text/Artur-B-G0042.xlsx") 
+    curr_user, code = return_user_data()
+    if not code == -1:
+        txt = return_text_from_xlsx("../text/{}.xlsx".format(code)) 
+    else:
+        txt = []
+    # txt = return_text_from_xlsx("../text/Artur-B-G0042.xlsx") 
 
     def on_enter(self):
         settings = read_settings_file()
@@ -533,8 +559,8 @@ class UserDataScreen(Screen):
             popup_text = "Koda ni veljavna"
             all_data_submited = False 
 
-
-        all_data_submited = True # Remove this for the code to work
+        # Uncomment this for the code to work
+        # all_data_submited = True 
         
         if all_data_submited:
             data = 'Ime: {}\nPriimek: {}\nSpol: {}\nRegija: {}\nKoda: {}\n'.format(name, surname, sex, region, code)

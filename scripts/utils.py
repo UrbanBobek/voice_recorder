@@ -86,8 +86,11 @@ def return_user_data():
             curr_user = "noUser"
             code = "NoCode"
         f.close()
+    if code == 'Koda:':
+        code = -1
     return curr_user, code
 
+print(return_user_data())
 # txt = return_text_from_xlsx("text/Artur-B-G0042.xlsx")
 # print(txt[20])
 
